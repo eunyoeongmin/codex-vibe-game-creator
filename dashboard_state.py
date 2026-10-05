@@ -31,7 +31,18 @@ class State:
                     id TEXT PRIMARY KEY, project_id TEXT NOT NULL,
                     data TEXT NOT NULL, answered INTEGER NOT NULL DEFAULT 0);
                 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS chat_history (
+                    project_id TEXT NOT NULL, item_key TEXT NOT NULL, seq INTEGER NOT NULL,
+                    data TEXT NOT NULL, PRIMARY KEY(project_id, item_key));
+                CREATE INDEX IF NOT EXISTS chat_history_page ON chat_history(project_id, seq);
             ''')
+            # Build the display index once for existing installations. Raw events stay intact.
+            if not db.execute("SELECT 1 FROM settings WHERE key='chat_history_version'").fetchone():
+                db.execute('BEGIN IMMEDIATE')
+                for row in db.execute('SELECT seq,project_id,data FROM events ORDER BY seq'):
+                    self._index_chat(db, row['project_id'], row['seq'], json.loads(row['data']))
+                db.execute("INSERT INTO settings VALUES('chat_history_version','1')")
+                db.commit()
             db.execute('INSERT OR IGNORE INTO settings VALUES(?,?)', ('projects_root', str(self.projects_root)))
             self.projects_root = Path(db.execute('SELECT value FROM settings WHERE key=?',
                                                 ('projects_root',)).fetchone()[0]).resolve()
@@ -116,9 +127,59 @@ class State:
 
     def event(self, project_id, kind, **data):
         with self.lock, closing(self.connect()) as db:
-            db.execute('INSERT INTO events(project_id,data) VALUES(?,?)',
-                       (project_id, json.dumps({'kind': kind, **data}, ensure_ascii=False)))
+            event = {'kind': kind, **data}
+            result = db.execute('INSERT INTO events(project_id,data) VALUES(?,?)',
+                                (project_id, json.dumps(event, ensure_ascii=False)))
+            self._index_chat(db, project_id, result.lastrowid, event)
             db.commit()
+
+    @staticmethod
+    def _index_chat(db, project_id, seq, event):
+        kind = event['kind']
+        key = f'event:{seq}'
+        if kind == 'agent_delta':
+            key = 'item:' + event['item_id']
+            previous = db.execute('SELECT data FROM chat_history WHERE project_id=? AND item_key=?',
+                                  (project_id, key)).fetchone()
+            text = json.loads(previous[0])['item'].get('text', '') if previous else ''
+            event = {'kind': 'item', 'phase': 'streaming', 'item': {
+                'type': 'agentMessage', 'id': event['item_id'], 'text': text + event['text']}}
+        elif kind == 'item':
+            item = event['item']
+            if item['type'] not in ('agentMessage', 'fileChange'):
+                return
+            key = 'item:' + item['id']
+            if item['type'] == 'agentMessage' and not item.get('text') and not item.get('questions'):
+                return
+        elif kind not in ('user', 'startup', 'error', 'blocked', 'disconnected', 'model_selected',
+                          'instruction_sent') and not (kind == 'turn_completed' and event.get('error')):
+            return
+        db.execute('''INSERT INTO chat_history(project_id,item_key,seq,data) VALUES(?,?,?,?)
+                      ON CONFLICT(project_id,item_key) DO UPDATE SET data=excluded.data''',
+                   (project_id, key, seq, json.dumps(event, ensure_ascii=False)))
+
+    def history(self, project_id, before=None, limit=30):
+        limit = max(1, min(int(limit), 100))
+        if before is not None and before < 1:
+            raise ValueError('Invalid history cursor')
+        with closing(self.connect()) as db:
+            # The history snapshot and live-event cursor must describe the same instant.
+            db.execute('BEGIN')
+            cursor = db.execute('SELECT COALESCE(MAX(seq),0) FROM events WHERE project_id=?',
+                                (project_id,)).fetchone()[0]
+            rows = db.execute('''SELECT seq,data FROM chat_history
+                                 WHERE project_id=? AND seq<? AND json_extract(data,'$.kind')!='instruction_sent'
+                                 ORDER BY seq DESC LIMIT ?''',
+                              (project_id, before if before is not None else cursor + 1, limit + 1)).fetchall()
+            page = rows[:limit]
+            instructions = db.execute('''SELECT seq,data FROM chat_history WHERE project_id=? AND seq>=? AND seq<?
+                                         AND json_extract(data,'$.kind')='instruction_sent' ORDER BY seq''',
+                                      (project_id, page[-1]['seq'] if page and len(rows) > limit else 0,
+                                       before if before is not None else cursor + 1)).fetchall()
+            return {'events': [{'seq': row['seq'], **json.loads(row['data'])} for row in reversed(page)],
+                    'instructions': [{'seq': row['seq'], **json.loads(row['data'])} for row in instructions],
+                    'before': page[-1]['seq'] if page else None,
+                    'has_more': len(rows) > limit, 'cursor': cursor}
 
     def merge_info(self, project_id, **fields):
         with self.lock, closing(self.connect()) as db:

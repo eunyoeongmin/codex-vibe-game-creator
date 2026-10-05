@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.1
+
+- Attach files by drag and drop, or paste copied images into the message input.
+- Preview attached images before sending and display sent images when reopening conversations.
+- Load the latest 30 conversation entries first, then load older entries on upward scroll without moving the reading position.
+- Reconstruct historical replies without replaying individual streaming fragments; preserve original event logs.
+- Show live Codex activity from app-server events, including reply writing, commands, file operations and search.
+- Fix activity visibility when sending ordinary messages while question cards remain open.
+- Add the MIT license, third-party license tables in all five READMEs, and an inventory of all 60 pinned Python packages.
+
 ## 0.1.0
 
 First packaged preview of Codex Vibe Game Creator.

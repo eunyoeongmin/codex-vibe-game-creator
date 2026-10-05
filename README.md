@@ -62,4 +62,25 @@ The dashboard listens on **127.0.0.1** with a per-run access token. Codex uses a
 
 ## Development and releases
 
-See [Maintaining and releasing](docs/maintaining.md). Version: **0.1.0**. Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
+See [Maintaining and releasing](docs/maintaining.md). Version: **0.1.1**. Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+This project is licensed under the [MIT License](LICENSE). Third-party dependencies retain their own licenses.
+
+### Third-party software
+
+The release ZIP and setup executable contain the harness code and documentation. Python and Codex are reused when available or downloaded during setup; Python packages and the embedding model are installed into the shared runtime. SQLite is provided through Python. Windows PowerShell and .NET Framework are system prerequisites, not bundled programs.
+
+| Component | Version / source | License |
+|---|---|---|
+| Python | 3.12.10 | [PSF License Agreement](https://docs.python.org/3.12/license.html) |
+| Codex CLI | 0.160.0 | [Apache-2.0](https://github.com/openai/codex/blob/rust-v0.160.0/LICENSE) |
+| Semantica | 0.7.0 | [MIT](https://github.com/semantica-agi/semantica/blob/main/LICENSE) |
+| SQLite | Python runtime | [Public domain](https://www.sqlite.org/copyright.html) |
+| sqlite-vec | 0.1.9 | [MIT](https://github.com/asg017/sqlite-vec/blob/main/LICENSE-MIT) / [Apache-2.0](https://github.com/asg017/sqlite-vec/blob/main/LICENSE-APACHE) |
+| FastEmbed | 0.8.1 | [Apache-2.0](https://github.com/qdrant/fastembed/blob/main/LICENSE) |
+| ONNX Runtime | 1.30.0 | [MIT](https://github.com/microsoft/onnxruntime/blob/main/LICENSE) |
+| sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 | Model | [Apache-2.0](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2) |
+
+The complete list of 60 pinned Python packages, declared licenses and notice locations is in [Third-party licenses](docs/third-party-licenses.md). These components retain their own licenses; the harness MIT license does not replace them.

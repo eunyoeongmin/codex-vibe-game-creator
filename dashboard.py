@@ -280,12 +280,16 @@ class Handler(BaseHTTPRequestHandler):
         project_id, action = parts[2:]
         project = app.state.project(project_id)
         root = Path(project['path'])
+        if method == 'GET' and action == 'history':
+            before = int(query['before']) if 'before' in query else None
+            return app.state.history(project_id, before=before)
         if method == 'GET' and action == 'events':
             session = app.sessions.get(project_id)
             return {'events': app.state.events(project_id, int(query.get('after', 0))),
                     'questions': app.state.questions(project_id), 'project': project,
                     'connected': bool(session and not session.closed),
                     'working': bool(session and session.turn_id),
+                    'activity': session.activity_status() if session else None,
                     'progress': app.planning.progress(project_id)}
         if method == 'GET' and action == 'progress':
             return app.planning.progress(project_id)
@@ -329,8 +333,9 @@ class Handler(BaseHTTPRequestHandler):
                 return {'accepted': True, 'progress': app.planning.open_summary(project_id)}
             if attachments:
                 text += '\n\n첨부 파일(프로젝트 상대 경로):\n' + '\n'.join(p.relative_to(root).as_posix() for p in attachments)
-            app.session(project_id).send_message(text, attachments=attachments)
-            return {'accepted': True}
+            session = app.session(project_id)
+            session.send_message(text, attachments=attachments)
+            return {'accepted': True, 'working': bool(session.turn_id), 'activity': session.activity_status()}
         if method == 'POST' and action == 'interrupt':
             app.session(project_id).interrupt()
             return {'accepted': True}
@@ -370,6 +375,14 @@ class Handler(BaseHTTPRequestHandler):
             path.parent.mkdir(parents=True, exist_ok=True)
             safe_file(root, path.relative_to(root).as_posix()).write_text(content, encoding='utf-8')
             return {'digest': hashlib.sha256(path.read_bytes()).hexdigest()}
+        if method == 'GET' and action == 'attachment':
+            path = safe_file(root, query.get('path'))
+            types = {'.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+                     '.gif': 'image/gif', '.webp': 'image/webp', '.bmp': 'image/bmp', '.avif': 'image/avif'}
+            if (path.parent != root / 'uploads' or path.suffix.lower() not in types
+                    or not path.is_file() or path.stat().st_size > 16 * 1024 * 1024):
+                raise ValueError('이 프로젝트에 업로드한 이미지만 미리 볼 수 있습니다.')
+            return {'mime': types[path.suffix.lower()], 'data': base64.b64encode(path.read_bytes()).decode('ascii')}
         if method == 'POST' and action == 'upload':
             name = body.get('name', '')
             if not isinstance(name, str) or not name or '/' in name or '\\' in name or ':' in name:

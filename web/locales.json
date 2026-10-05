@@ -1409,10 +1409,154 @@
     "zh-Hans": "暂无已保存的决策。",
     "zh-Hant": "暫無已儲存的決策。"
   },
+  "생각 중…": {
+    "en": "Thinking…",
+    "ja": "考え中…",
+    "zh-Hans": "思考中…",
+    "zh-Hant": "思考中…"
+  },
+  "대화를 불러오는 중…": {
+    "en": "Loading conversation…",
+    "ja": "会話を読み込み中…",
+    "zh-Hans": "正在加载对话…",
+    "zh-Hant": "正在載入對話…"
+  },
+  "이전 대화를 불러오는 중…": {
+    "en": "Loading earlier messages…",
+    "ja": "以前の会話を読み込み中…",
+    "zh-Hans": "正在加载之前的对话…",
+    "zh-Hant": "正在載入先前的對話…"
+  },
+  "대화를 불러오지 못했습니다.": {
+    "en": "Could not load the conversation.",
+    "ja": "会話を読み込めませんでした。",
+    "zh-Hans": "无法加载对话。",
+    "zh-Hant": "無法載入對話。"
+  },
+  "대화 불러오는 중": {
+    "en": "Loading conversation",
+    "ja": "会話を読み込み中",
+    "zh-Hans": "正在加载对话",
+    "zh-Hant": "正在載入對話"
+  },
+  "다시 시도": {
+    "en": "Retry",
+    "ja": "再試行",
+    "zh-Hans": "重试",
+    "zh-Hant": "重試"
+  },
+  "업로드 중…": {
+    "en": "Uploading…",
+    "ja": "アップロード中…",
+    "zh-Hans": "正在上传…",
+    "zh-Hant": "正在上傳…"
+  },
+  "첨부 제거: {0}": {
+    "en": "Remove attachment: {0}",
+    "ja": "添付を削除: {0}",
+    "zh-Hans": "移除附件：{0}",
+    "zh-Hant": "移除附件：{0}"
+  },
+  "파일을 읽지 못했습니다.": {
+    "en": "Could not read the file.",
+    "ja": "ファイルを読み込めませんでした。",
+    "zh-Hans": "无法读取文件。",
+    "zh-Hant": "無法讀取檔案。"
+  },
+  "이 프로젝트에 업로드한 이미지만 미리 볼 수 있습니다.": {
+    "en": "Only images uploaded to this project can be previewed.",
+    "ja": "このプロジェクトにアップロードした画像のみプレビューできます。",
+    "zh-Hans": "只能预览上传到此项目的图片。",
+    "zh-Hant": "只能預覽上傳到此專案的圖片。"
+  },
   "Codex 로그인 후 사용량을 확인할 수 있습니다.": {
     "en": "Sign in to Codex to view usage.",
     "ja": "使用量を確認するにはCodexにログインしてください。",
     "zh-Hans": "登录 Codex 后可查看使用量。",
     "zh-Hant": "登入 Codex 後可查看使用量。"
+  },
+  "답변 작성 중…": {
+    "en": "Writing a reply…",
+    "ja": "回答を作成中…",
+    "zh-Hans": "正在撰写回复…",
+    "zh-Hant": "正在撰寫回覆…"
+  },
+  "계획 정리 중…": {
+    "en": "Preparing the plan…",
+    "ja": "計画を整理中…",
+    "zh-Hans": "正在整理计划…",
+    "zh-Hant": "正在整理計畫…"
+  },
+  "명령 실행 중…": {
+    "en": "Running a command…",
+    "ja": "コマンドを実行中…",
+    "zh-Hans": "正在执行命令…",
+    "zh-Hant": "正在執行命令…"
+  },
+  "파일 수정 중…": {
+    "en": "Editing files…",
+    "ja": "ファイルを編集中…",
+    "zh-Hans": "正在修改文件…",
+    "zh-Hant": "正在修改檔案…"
+  },
+  "파일 읽는 중…": {
+    "en": "Reading files…",
+    "ja": "ファイルを読み取り中…",
+    "zh-Hans": "正在读取文件…",
+    "zh-Hant": "正在讀取檔案…"
+  },
+  "파일 검색 중…": {
+    "en": "Searching files…",
+    "ja": "ファイルを検索中…",
+    "zh-Hans": "正在搜索文件…",
+    "zh-Hant": "正在搜尋檔案…"
+  },
+  "파일 목록 확인 중…": {
+    "en": "Listing files…",
+    "ja": "ファイル一覧を確認中…",
+    "zh-Hans": "正在查看文件列表…",
+    "zh-Hant": "正在查看檔案清單…"
+  },
+  "웹 검색 중…": {
+    "en": "Searching the web…",
+    "ja": "ウェブを検索中…",
+    "zh-Hans": "正在搜索网页…",
+    "zh-Hant": "正在搜尋網頁…"
+  },
+  "도구 사용 중…": {
+    "en": "Using a tool…",
+    "ja": "ツールを使用中…",
+    "zh-Hans": "正在使用工具…",
+    "zh-Hant": "正在使用工具…"
+  },
+  "이미지 확인 중…": {
+    "en": "Viewing an image…",
+    "ja": "画像を確認中…",
+    "zh-Hans": "正在查看图片…",
+    "zh-Hant": "正在查看圖片…"
+  },
+  "이미지 생성 중…": {
+    "en": "Generating an image…",
+    "ja": "画像を生成中…",
+    "zh-Hans": "正在生成图片…",
+    "zh-Hant": "正在產生圖片…"
+  },
+  "대화 정리 중…": {
+    "en": "Compacting conversation…",
+    "ja": "会話を整理中…",
+    "zh-Hans": "正在压缩对话…",
+    "zh-Hant": "正在壓縮對話…"
+  },
+  "요청 전달 중…": {
+    "en": "Sending request…",
+    "ja": "リクエストを送信中…",
+    "zh-Hans": "正在发送请求…",
+    "zh-Hant": "正在傳送請求…"
+  },
+  "작업 중…": {
+    "en": "Working…",
+    "ja": "作業中…",
+    "zh-Hans": "处理中…",
+    "zh-Hant": "處理中…"
   }
 }

@@ -7,6 +7,24 @@
 
 #planning-bar{width:100%;accent-color:var(--accent);height:9px}#planning-checklist{margin:18px 0}.planning-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}.summary-card{margin-top:18px;padding:16px;background:white;border:1px solid var(--line);border-radius:10px}.summary-card h4{margin:18px 0 6px}.summary-card ul{padding-left:18px;font-size:12px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}.summary-actions{display:flex;gap:8px;position:sticky;bottom:0;padding:10px 0;background:white}#spec-version{font-size:12px;color:var(--accent)}
 
+.chat-panel.file-dragover #composer{outline:2px dashed var(--accent);outline-offset:3px;background:var(--soft)}
+#attachments:not(:empty){padding:10px;max-height:220px;overflow:auto}
+.attachment-card{position:relative;display:flex;flex-direction:column;gap:5px;width:124px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--soft)}
+.attachment-card img{width:106px;height:86px;object-fit:contain;border-radius:4px;background:var(--canvas,#f7f8fa)}
+.attachment-name{font-size:11px;overflow-wrap:anywhere;padding-right:14px}
+#attachments .attachment-remove{position:absolute;right:3px;top:3px;margin:0;width:24px;height:24px;padding:0;font-size:17px;line-height:1}
+.message-attachments{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;white-space:normal}
+.message-attachments img{width:260px;height:180px;max-width:100%;object-fit:contain;border:1px solid var(--line);border-radius:8px}
+.conversation{position:relative;display:flex;flex:1;min-height:0;overflow:hidden}
+#messages{min-width:0;scroll-behavior:auto;overflow-anchor:none}
+#messages.history-initial{visibility:hidden}
+#history-loading{position:absolute;top:0;left:0;right:0;z-index:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;background:var(--surface,#fff);border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+#history-loading progress{width:90px;height:5px;accent-color:var(--accent)}
+#codex-activity{display:flex;align-items:center;gap:8px;flex-shrink:0;padding:8px 25px 12px;color:var(--muted);font-size:12px}
+#codex-activity strong{font-size:10px;letter-spacing:.05em}
+.activity-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:activity-pulse 1.3s ease-in-out infinite}
+@keyframes activity-pulse{0%,100%{opacity:.3}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.activity-dot{animation:none}}
 /* Panel edge controls and draggable splitters. */
 :root{--surface:#fff;--canvas:#f7f8fa;--left-width:246px;--right-width:460px;--top-height:100px}
 body{padding:0;--left-size:var(--left-width);--right-size:var(--right-width);--top-size:var(--top-height)}

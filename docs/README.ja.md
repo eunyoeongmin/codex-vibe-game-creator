@@ -56,4 +56,21 @@ OpenAIの公式製品ではない、独立したコミュニティプロジェ�
 
 配布実行ファイルは現在コード署名されていません。このリポジトリのReleasesから取得し、`SHA256SUMS.txt`で照合できます。
 
-バージョン **0.1.0** · [変更履歴](../CHANGELOG.md) · [保守・リリース手順](maintaining.md)
+バージョン **0.1.1** · [変更履歴](../CHANGELOG.md) · [保守・リリース手順](maintaining.md)
+
+## ライセンスと外部コンポーネント
+
+本プロジェクトは [MITライセンス](../LICENSE)です。ReleaseのZIP・セットアップ実行ファイルにはハーネスのコードと文書を含みます。Python・Codexは既存のインストールを利用するかセットアップ時にダウンロードし、Pythonパッケージと埋め込みモデルは共有実行環境にインストールします。SQLiteはPython経由で利用します。Windows PowerShell・.NET Frameworkはシステム要件であり、同梱していません。
+
+| コンポーネント | バージョン / 提供元 | ライセンス |
+|---|---|---|
+| Python | 3.12.10 | [PSF License Agreement](https://docs.python.org/3.12/license.html) |
+| Codex CLI | 0.160.0 | [Apache-2.0](https://github.com/openai/codex/blob/rust-v0.160.0/LICENSE) |
+| Semantica | 0.7.0 | [MIT](https://github.com/semantica-agi/semantica/blob/main/LICENSE) |
+| SQLite | Python runtime | [Public domain](https://www.sqlite.org/copyright.html) |
+| sqlite-vec | 0.1.9 | [MIT](https://github.com/asg017/sqlite-vec/blob/main/LICENSE-MIT) / [Apache-2.0](https://github.com/asg017/sqlite-vec/blob/main/LICENSE-APACHE) |
+| FastEmbed | 0.8.1 | [Apache-2.0](https://github.com/qdrant/fastembed/blob/main/LICENSE) |
+| ONNX Runtime | 1.30.0 | [MIT](https://github.com/microsoft/onnxruntime/blob/main/LICENSE) |
+| sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 | Model | [Apache-2.0](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2) |
+
+バージョンを固定したPythonパッケージ60個のライセンスと告知ファイルの場所は[外部コンポーネントのライセンス一覧](third-party-licenses.md)をご覧ください。各コンポーネントには個別のライセンスが適用され、ハーネスのMITライセンスに置き換わるものではありません。

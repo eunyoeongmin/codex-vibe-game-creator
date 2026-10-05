@@ -5,6 +5,9 @@ const token = fragment.get('token') || sessionStorage.getItem('harness-token');
 if (fragment.has('token')) { sessionStorage.setItem('harness-token', token); history.replaceState(null, '', '/'); }
 let current = null, cursor = 0, projects = [], polling = false, connected = false, working = false;
 let uploads = [], openFile = null, fileDigest = null, selectedModel = '', lastQuestionKey = '', viewVersion = 0;
+let sending = false;
+let activity = null;
+let chatHistory = {ready: false, busy: false, before: null, more: false};
 let modelCatalog = [], sandboxPending = false;
 let planning = null, planningKey = '', summaryVisible = false, summaryBusy = false;
 let productionKey = '', productionStarted = null;
@@ -70,7 +73,7 @@ for (const panel of ['left', 'right', 'top']) {
 $('toggle-theme').onclick = () => { appearance.theme = appearance.theme === 'dark' ? 'light' : 'dark'; applyAppearance(); };
 $('language').onchange = () => run(async () => {
   const settings = await api('preferences', {language: $('language').value});
-  I18n.apply(settings.language); applyAppearance();
+  I18n.apply(settings.language); applyAppearance(); renderUploads();
   planningKey = ''; productionKey = ''; if (planning) renderPlanning(planning);
   // Keep drafts, editor changes and question answers when changing languages.
   for (const card of $('questions').children) {
@@ -178,19 +181,71 @@ function renderEfforts(preferred) {
 }
 
 async function openProject(project) {
-  viewVersion++; current = project; cursor = 0; itemNodes.clear(); lastQuestionKey = ''; uploads = [];
-  connected = working = false; openFile = fileDigest = null;
+  clearUploads(); sending = false;
+  viewVersion++; current = project; cursor = 0; itemNodes.clear(); lastQuestionKey = '';
+  const version = viewVersion;
+  chatHistory = {ready: false, busy: false, before: null, more: false};
+  connected = working = false; activity = null; openFile = fileDigest = null;
   planning = null; planningKey = ''; summaryVisible = false;
   productionKey = ''; productionStarted = null;
   $('planning-summary').hidden = true;
   $('home').hidden = true; $('workspace').hidden = false; $('folder').hidden = false;
   $('page-title').textContent = project.name; $('messages').replaceChildren(); $('questions').replaceChildren();
+  $('messages').classList.add('history-initial');
   $('instruction-history').replaceChildren();
   $('message').value = ''; $('editor-panel').hidden = true; $('preview-frame').removeAttribute('src');
   $('model').value = project.model || selectedModel; renderEfforts(); renderUploads(); notice('');
+  await loadHistory(true);
+  if (version !== viewVersion || !chatHistory.ready) return;
   await loadProjects(); await loadFiles(); await poll(); await loadUsage();
+  if (version !== viewVersion) return;
   if (!connected) await connect();
 }
+
+async function loadHistory(initial = false) {
+  if (!current || chatHistory.busy || (!initial && !chatHistory.more)) return;
+  const state = chatHistory, version = viewVersion, id = current.id;
+  state.busy = true;
+  const loader = $('history-loading'); loader.hidden = false;
+  $('history-retry').hidden = true; loader.querySelector('progress').hidden = false;
+  $('history-loading-label').textContent = initial ? t('대화를 불러오는 중…') : t('이전 대화를 불러오는 중…');
+  $('messages').setAttribute('aria-busy', 'true');
+  try {
+    const result = await api(`projects/${id}/history${initial ? '' : '?before=' + state.before}`);
+    if (version !== viewVersion) return;
+    const box = $('messages'), fragment = document.createDocumentFragment();
+    // Anchor to a visible message so live replies arriving during the request cannot move the viewport.
+    const anchor = [...box.children].find(node => node.getBoundingClientRect().bottom > box.getBoundingClientRect().top);
+    const anchorTop = anchor?.getBoundingClientRect().top;
+    for (const event of result.events) showEvent(event, fragment, true);
+    for (const event of result.instructions || []) showEvent(event, fragment, true);
+    if (initial) box.replaceChildren(fragment); else box.prepend(fragment);
+    state.before = result.before; state.more = result.has_more;
+    if (initial) {
+      cursor = result.cursor; state.ready = true;
+      box.classList.remove('history-initial'); box.scrollTop = box.scrollHeight;
+    } else if (anchor) box.scrollTop += anchor.getBoundingClientRect().top - anchorTop;
+    loader.hidden = true;
+    if (state.error && $('notice-text').textContent === t(state.error)) notice('');
+    state.error = null;
+  } catch (error) {
+    if (version !== viewVersion) return;
+    $('history-loading-label').textContent = t('대화를 불러오지 못했습니다.');
+    loader.querySelector('progress').hidden = true; $('history-retry').hidden = false;
+    state.error = error.message;
+    notice(error.message, !!error.reconnect);
+  } finally {
+    state.busy = false;
+    if (version === viewVersion) $('messages').setAttribute('aria-busy', 'false');
+  }
+}
+$('messages').addEventListener('scroll', () => {
+  if (chatHistory.ready && $('messages').scrollTop < 120) run(() => loadHistory());
+});
+$('history-retry').onclick = () => run(async () => {
+  await loadHistory(!chatHistory.ready);
+  if (chatHistory.ready) { await poll(); if (!connected) await connect(); }
+});
 
 async function connect() {
   $('connect').disabled = true; $('connection-state').textContent = t('Codex 연결 중');
@@ -200,10 +255,10 @@ async function connect() {
   } finally { $('connect').disabled = false; }
 }
 
-function addMessage(kind, text) {
+function addMessage(kind, text, target = $('messages')) {
   const node = element('div', 'message ' + kind);
   node.append(element('span', 'role', kind === 'user' ? t('나') : kind === 'agent' ? 'CODEX' : t('작업 안내')));
-  const body = element('div', '', text); node.append(body); $('messages').append(node); return {node, body};
+  const body = element('div', '', text); node.append(body); target.append(node); return {node, body};
 }
 function renderAgent(record, text) {
   record.rawText = text;
@@ -222,7 +277,7 @@ function userMessageText(text) {
     return replies.map(r => `${r.question}\n${wrapped ? r.answer : r.skipped ? t('건너뛰기') : r.user_quote}`).join('\n\n');
   } catch (_) { return text; }
 }
-function showEvent(event) {
+function showEvent(event, target = $('messages'), historical = false) {
   // Keep the original event log; terminal execution is not conversation content.
   if (event.kind === 'command_delta' ||
       (event.kind === 'item' && event.item.type === 'commandExecution')) return;
@@ -230,30 +285,35 @@ function showEvent(event) {
     const entry = element('details', 'instruction-entry');
     entry.append(element('summary', '', `${event.sent_at} · ${event.section} · v${event.version}`));
     entry.append(element('pre', '', t('파일: {0}\n파일 SHA-256: {1}\n본문 SHA-256: {2}\n대화: {3}\n턴: {4}\n전달: {5}\n\n{6}', event.path, event.sha256, event.text_sha256, event.thread_id, event.turn_id || t('연결 시 적용'), event.method, event.text)));
-    $('instruction-history').prepend(entry);
+    entry.dataset.seq = event.seq;
+    const history = $('instruction-history');
+    const next = [...history.children].find(node => Number(node.dataset.seq) < event.seq);
+    history.insertBefore(entry, next || null);
   } else if (event.kind === 'agent_delta') {
     let record = itemNodes.get(event.item_id);
-    if (!record) { record = addMessage('agent', ''); itemNodes.set(event.item_id, record); }
+    if (!record) { record = addMessage('agent', '', target); itemNodes.set(event.item_id, record); }
     renderAgent(record, (record.rawText || '') + event.text);
   } else if (event.kind === 'user' || ['error', 'blocked', 'disconnected', 'model_selected'].includes(event.kind)) {
-    addMessage(event.kind, event.kind === 'user' ? userMessageText(event.text) : event.text);
-    if (event.kind === 'disconnected') notice(t('Codex 연결이 끊어졌습니다.'), true);
+    const record = addMessage(event.kind, event.kind === 'user' ? userMessageText(event.text) : event.text, target);
+    if (event.kind === 'user' && event.attachments?.length) renderMessageAttachments(record.node, event.attachments);
+    if (!historical && event.kind === 'disconnected') notice(t('Codex 연결이 끊어졌습니다.'), true);
   } else if (event.kind === 'startup') {
     const node = element('div', 'message'); const details = element('details');
     details.append(element('summary', '', t('자동 시작 안내를 보냈습니다')), element('pre', '', event.text));
-    node.append(details); $('messages').append(node);
+    node.append(details); target.append(node);
   } else if (event.kind === 'item') {
     const item = event.item;
+    if (historical && itemNodes.has(item.id)) return;
     if (item.type === 'agentMessage') {
       if (item.questions?.length) return;
       let record = itemNodes.get(item.id);
-      if (!record) { record = addMessage('agent', ''); itemNodes.set(item.id, record); }
+      if (!record) { record = addMessage('agent', '', target); itemNodes.set(item.id, record); }
       if (item.text) renderAgent(record, item.text);
     } else if (item.type === 'commandExecution' || item.type === 'fileChange') {
       let record = itemNodes.get(item.id);
       if (!record) {
         const node = element('details', 'command'), label = element('summary'), body = element('pre');
-        node.append(label, body); $('messages').append(node); record = {node, label, body}; itemNodes.set(item.id, record);
+        node.append(label, body); target.append(node); record = {node, label, body}; itemNodes.set(item.id, record);
       }
       const title = item.type === 'commandExecution' ? item.command : (item.changes || []).map(c => c.path).join(', ');
       record.label.textContent = (event.phase === 'completed' ? (item.status === 'failed' ? t('실패 · ') : t('완료 · ')) : t('진행 · ')) + title;
@@ -263,12 +323,12 @@ function showEvent(event) {
   } else if (event.kind === 'command_delta') {
     const record = itemNodes.get(event.item_id); if (record) record.body.textContent += event.text;
   } else if (event.kind === 'turn_completed' && event.error) {
-    addMessage('error', event.error.message || JSON.stringify(event.error));
+    addMessage('error', event.error.message || JSON.stringify(event.error), target);
   }
 }
 
 async function poll() {
-  if (!current || polling) return;
+  if (!current || polling || !chatHistory.ready) return;
   polling = true; const id = current.id, version = viewVersion;
   try {
     const result = await api(`projects/${id}/events?after=${cursor}`);
@@ -276,18 +336,33 @@ async function poll() {
     const box = $('messages'), follow = box.scrollHeight - box.scrollTop - box.clientHeight < 100;
     for (const event of result.events) { showEvent(event); cursor = event.seq; }
     if (connected && !result.connected) notice(t('Codex 연결이 끊어졌습니다.'), true);
-    connected = result.connected; working = result.working;
+    connected = result.connected; working = result.working; activity = result.activity || null;
     if (result.project.model && document.activeElement !== $('model')) $('model').value = result.project.model;
     if (document.activeElement !== $('effort')) renderEfforts(result.project.info?.requested_effort);
     $('connection-state').textContent = connected ? (working ? t('Codex 작업 중') : t('대화 연결됨')) : t('연결 대기');
     $('working-label').textContent = working ? t('작업 중에도 메시지를 보낼 수 있어요') : '';
     $('stop').hidden = !working; $('connect').hidden = connected;
     $('model').disabled = false;
-    $('send').disabled = !connected;
+    updateSendButton();
     renderPlanning(result.progress);
     renderQuestions(result.progress?.show_summary ? [] : result.questions); renderEnvironment(result.project); renderContext(result.project.info?.token_usage);
+    renderActivity();
     if (follow) box.scrollTop = box.scrollHeight;
+  } catch (error) {
+    if (version === viewVersion) $('codex-activity').hidden = true;
+    throw error;
   } finally { polling = false; }
+}
+
+function renderActivity() {
+  const labels = {thinking: t('생각 중…'), responding: t('답변 작성 중…'), planning: t('계획 정리 중…'),
+    command: t('명령 실행 중…'), editing: t('파일 수정 중…'), reading: t('파일 읽는 중…'),
+    file_search: t('파일 검색 중…'), listing: t('파일 목록 확인 중…'), web_search: t('웹 검색 중…'),
+    tool: t('도구 사용 중…'), image_view: t('이미지 확인 중…'), image_generation: t('이미지 생성 중…'),
+    compacting: t('대화 정리 중…')};
+  $('codex-activity-label').textContent = sending ? t('요청 전달 중…') : labels[activity] || t('작업 중…');
+  $('codex-activity').hidden = !current || !connected || !(sending || working)
+    || (!sending && activity === 'waiting');
 }
 
 function renderPlanning(value) {
@@ -513,7 +588,81 @@ async function loadRecords() {
 }
 function renderUploads() {
   $('attachments').replaceChildren();
-  uploads.forEach((path, index) => $('attachments').append(button(path.split('/').pop() + ' ×', () => { uploads.splice(index, 1); renderUploads(); })));
+  for (const attachment of uploads) {
+    const card = element('div', 'attachment-card');
+    if (attachment.preview) {
+      const image = element('img'); image.src = attachment.preview; image.alt = attachment.name;
+      card.append(image);
+    }
+    card.append(element('span', 'attachment-name', attachment.name));
+    if (!attachment.path) card.append(element('small', 'muted', t('업로드 중…')));
+    const remove = button('×', () => { removeUpload(attachment); renderUploads(); }, 'attachment-remove');
+    remove.setAttribute('aria-label', t('첨부 제거: {0}', attachment.name));
+    card.append(remove); $('attachments').append(card);
+  }
+  updateSendButton();
+}
+function updateSendButton() {
+  $('send').disabled = !connected || sending || uploads.some(file => !file.path);
+  renderActivity();
+}
+function removeUpload(attachment) {
+  if (attachment.preview) URL.revokeObjectURL(attachment.preview);
+  uploads = uploads.filter(file => file !== attachment);
+}
+function clearUploads() {
+  for (const attachment of [...uploads]) removeUpload(attachment);
+}
+async function attachFiles(files) {
+  if (!current) return;
+  const version = viewVersion, projectId = current.id;
+  const errors = [];
+  // Show every selected file immediately, and keep send disabled until uploads finish.
+  const pending = [];
+  for (const file of files) {
+    if (file.size > 16 * 1024 * 1024) { errors.push(t('첨부는 16MB 이하로 선택하세요.')); continue; }
+    const extension = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif' }[file.type];
+    const name = file.name || `image-${Date.now()}.${extension || 'png'}`;
+    const attachment = {name, path: null, preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null};
+    uploads.push(attachment); pending.push({file, attachment});
+  }
+  renderUploads();
+  for (const {file, attachment} of pending) {
+    if (version !== viewVersion) return;
+    if (!uploads.includes(attachment)) continue;
+    try {
+      const data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = () => reject(new Error(t('파일을 읽지 못했습니다.')));
+        reader.readAsDataURL(file);
+      });
+      if (version !== viewVersion || !uploads.includes(attachment)) continue;
+      const result = await api(`projects/${projectId}/upload`, {name: attachment.name, data});
+      if (version !== viewVersion) return;
+      if (uploads.includes(attachment)) attachment.path = result.path;
+    } catch (error) {
+      if (version !== viewVersion) return;
+      removeUpload(attachment); errors.push(error.message);
+    }
+    renderUploads();
+  }
+  if (version !== viewVersion) return;
+  if (errors.length) notice([...new Set(errors)].join('\n'));
+  await loadFiles();
+}
+function renderMessageAttachments(node, paths) {
+  const projectId = current.id, version = viewVersion;
+  const gallery = element('div', 'message-attachments'); node.append(gallery);
+  for (const path of paths) {
+    if (!/\.(png|jpe?g|gif|webp|bmp|avif)$/i.test(path)) continue;
+    const image = element('img'); image.alt = path.split('/').pop();
+    image.style.visibility = 'hidden'; gallery.append(image);
+    api(`projects/${projectId}/attachment?path=${encodeURIComponent(path)}`).then(result => {
+      if (version !== viewVersion || !image.isConnected) return;
+      image.src = `data:${result.mime};base64,${result.data}`; image.style.visibility = '';
+    }).catch(() => { image.style.visibility = ''; });
+  }
 }
 
 $('new-project').onclick = $('welcome-create').onclick = () => { $('create-dialog').showModal(); $('project-name').focus(); };
@@ -523,7 +672,7 @@ $('create-form').onsubmit = event => { event.preventDefault(); run(async () => {
   try { selectedModel = $('model').value; const {project} = await api('projects', {name: $('project-name').value}); $('create-dialog').close(); $('project-name').value = ''; await openProject(project); }
   finally { $('create-submit').disabled = false; }
 }); };
-$('home-link').onclick = event => { event.preventDefault(); viewVersion++; current = null; $('home').hidden = false; $('workspace').hidden = true; $('folder').hidden = true; $('page-title').textContent = t('아이디어가 게임이 되는 곳'); $('connection-state').textContent = t('프로젝트를 선택하세요'); notice(''); run(loadProjects); };
+$('home-link').onclick = event => { event.preventDefault(); clearUploads(); sending = false; viewVersion++; current = null; $('home').hidden = false; $('workspace').hidden = true; $('folder').hidden = true; $('page-title').textContent = t('아이디어가 게임이 되는 곳'); $('connection-state').textContent = t('프로젝트를 선택하세요'); notice(''); run(loadProjects); };
 $('connect').onclick = () => run(connect);
 $('reconnect').onclick = () => run(async () => {
   $('reconnect').disabled = true;
@@ -555,21 +704,51 @@ $('login').onclick = () => {
 $('folder').onclick = () => run(() => projectApi('folder', {}));
 $('sandbox-setup').onclick = () => run(async () => { await api('sandbox', {}); notice(t('Windows 작업 권한을 준비합니다. 관리자 확인 창이 나타나면 설정을 완료해 주세요.')); await loadStatus(); });
 $('composer').onsubmit = event => { event.preventDefault(); run(async () => {
+  if ($('send').disabled) return;
   const text = $('message').value; if (!text.trim() && !uploads.length) return;
-  $('send').disabled = true;
-  try { await projectApi('message', {text, attachments: uploads}); $('message').value = ''; uploads = []; renderUploads(); notice(''); await poll(); }
-  finally { $('send').disabled = !connected; }
+  const version = viewVersion, attached = [...uploads];
+  sending = true; updateSendButton();
+  try {
+    const result = await projectApi('message', {text, attachments: attached.map(file => file.path)});
+    if (version !== viewVersion) return;
+    if (typeof result.working === 'boolean') { working = result.working; activity = result.activity || null; }
+    if ($('message').value === text) $('message').value = '';
+    for (const attachment of attached) removeUpload(attachment);
+    renderUploads(); notice(''); await poll();
+  } finally { if (version === viewVersion) { sending = false; updateSendButton(); } }
 }); };
 $('message').onkeydown = event => { if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229 && !event.repeat) { event.preventDefault(); if (!$('send').disabled) $('composer').requestSubmit(); } };
 $('stop').onclick = () => run(() => projectApi('interrupt', {}));
-$('upload').onchange = () => run(async () => {
-  for (const file of $('upload').files) {
-    if (file.size > 16 * 1024 * 1024) throw new Error(t('첨부는 16MB 이하로 선택하세요.'));
-    const data = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
-    const result = await projectApi('upload', {name: file.name, data}); uploads.push(result.path);
-  }
-  $('upload').value = ''; renderUploads(); await loadFiles();
+$('upload').onchange = () => {
+  const files = [...$('upload').files]; $('upload').value = '';
+  run(() => attachFiles(files));
+};
+$('message').addEventListener('paste', event => {
+  const files = [...(event.clipboardData?.files || [])].filter(file => file.type.startsWith('image/'));
+  if (!files.length) return; // Ordinary text and links keep their normal paste behavior.
+  event.preventDefault(); run(() => attachFiles(files));
 });
+const dropZone = document.querySelector('.chat-panel');
+let dragDepth = 0;
+const isFileDrag = event => [...(event.dataTransfer?.types || [])].includes('Files');
+const clearDrop = () => { dragDepth = 0; dropZone.classList.remove('file-dragover'); };
+dropZone.addEventListener('dragenter', event => {
+  if (!current || !isFileDrag(event)) return;
+  event.preventDefault(); dragDepth++; dropZone.classList.add('file-dragover');
+});
+dropZone.addEventListener('dragleave', () => { if (--dragDepth <= 0) clearDrop(); });
+dropZone.addEventListener('dragover', event => {
+  if (!current || !isFileDrag(event)) return;
+  event.preventDefault(); event.dataTransfer.dropEffect = 'copy';
+});
+dropZone.addEventListener('drop', event => {
+  clearDrop(); if (!current || !isFileDrag(event)) return;
+  event.preventDefault(); run(() => attachFiles([...event.dataTransfer.files]));
+});
+// A file dropped outside the chat must not navigate away from the dashboard.
+window.addEventListener('dragover', event => { if (isFileDrag(event)) event.preventDefault(); });
+window.addEventListener('drop', event => { if (isFileDrag(event)) event.preventDefault(); clearDrop(); });
+window.addEventListener('dragend', clearDrop);
 $('refresh-files').onclick = () => run(loadFiles); $('refresh-records').onclick = () => run(loadRecords);
 $('save-file').onclick = () => run(async () => { const result = await projectApi('file', {path: openFile, text: $('editor').value, digest: fileDigest}); fileDigest = result.digest; notice(t('파일을 저장했습니다.')); });
 $('preview-button').onclick = () => run(async () => { const result = await projectApi('preview', {path: $('preview-path').value}); $('preview-frame').src = result.url; });

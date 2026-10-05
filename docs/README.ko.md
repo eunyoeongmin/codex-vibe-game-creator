@@ -58,4 +58,21 @@ OpenAI의 공식 제품이 아닌 독립 커뮤니티 프로젝트입니다.
 - 진행도 없음: 현재 마일스톤의 진행 기록을 AI에 요청합니다. 과거 진행률을 추정하지 않습니다.
 - 배포 실행 파일은 아직 코드 서명이 없습니다. 이 저장소의 Releases에서 내려받고 `SHA256SUMS.txt`로 파일을 확인할 수 있습니다.
 
-현재 버전: **0.1.0** · [변경 이력](../CHANGELOG.md) · [유지보수·배포 안내](maintaining.md)
+현재 버전: **0.1.1** · [변경 이력](../CHANGELOG.md) · [유지보수·배포 안내](maintaining.md)
+
+## 라이선스와 외부 구성요소
+
+이 프로젝트는 [MIT 라이선스](../LICENSE)를 사용합니다. Release의 ZIP·설치 파일에는 하네스 코드와 문서가 들어갑니다. Python·Codex는 기존 설치본을 사용하거나 설치 과정에서 다운로드하고, Python 패키지와 임베딩 모델은 공용 실행 환경에 설치합니다. SQLite는 Python을 통해 사용합니다. Windows PowerShell·.NET Framework는 Windows의 실행 전제조건이며 배포 파일에 포함하지 않습니다.
+
+| 구성요소 | 버전 / 제공처 | 라이선스 |
+|---|---|---|
+| Python | 3.12.10 | [PSF License Agreement](https://docs.python.org/3.12/license.html) |
+| Codex CLI | 0.160.0 | [Apache-2.0](https://github.com/openai/codex/blob/rust-v0.160.0/LICENSE) |
+| Semantica | 0.7.0 | [MIT](https://github.com/semantica-agi/semantica/blob/main/LICENSE) |
+| SQLite | Python runtime | [Public domain](https://www.sqlite.org/copyright.html) |
+| sqlite-vec | 0.1.9 | [MIT](https://github.com/asg017/sqlite-vec/blob/main/LICENSE-MIT) / [Apache-2.0](https://github.com/asg017/sqlite-vec/blob/main/LICENSE-APACHE) |
+| FastEmbed | 0.8.1 | [Apache-2.0](https://github.com/qdrant/fastembed/blob/main/LICENSE) |
+| ONNX Runtime | 1.30.0 | [MIT](https://github.com/microsoft/onnxruntime/blob/main/LICENSE) |
+| sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 | Model | [Apache-2.0](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2) |
+
+고정된 Python 패키지 60개의 라이선스와 고지 파일 위치는 [외부 구성요소 라이선스 목록](third-party-licenses.md)에 정리했습니다. 각 구성요소의 라이선스는 그대로 적용되며, 하네스의 MIT 라이선스로 대체되지 않습니다.

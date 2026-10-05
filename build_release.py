@@ -9,7 +9,7 @@ import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parent
-FILES = ('VERSION', 'README.md', 'CHANGELOG.md', 'bootstrap.json', 'start.bat', 'start.ps1',
+FILES = ('VERSION', 'LICENSE', 'README.md', 'CHANGELOG.md', 'bootstrap.json', 'start.bat', 'start.ps1',
          'requirements-runtime.txt', 'runtime_setup.py', 'new_project.py', 'decisions.py',
          'codex_bridge.py', 'dashboard.py', 'dashboard_state.py', 'dashboard_session.py',
          'dashboard_planning.py', 'instruction_bundle.py', 'localization.py')

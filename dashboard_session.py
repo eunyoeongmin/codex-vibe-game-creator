@@ -29,6 +29,8 @@ class ProjectSession:
         self.root = Path(self.project['path'])
         self.lock = threading.RLock()
         self.turn_id = None
+        self.activity_lock = threading.Lock()
+        self.active_items = {}
         self.thread_id = self.project['thread_id']
         self.live_questions = {}
         self.finished_turns = deque(maxlen=128)
@@ -135,7 +137,9 @@ class ProjectSession:
                 self.turn_id = None if turn_id in self.finished_turns else turn_id
                 if self.requested_model:
                     self.state.merge_info(self.id, model=self.requested_model)
-            self.state.event(self.id, 'startup' if startup else 'user', text=text)
+            self.state.event(self.id, 'startup' if startup else 'user', text=text,
+                             **({'attachments': [path.relative_to(self.root).as_posix()
+                                                 for path in attachments]} if attachments else {}))
             if instruction_section:
                 self.record_instruction(instruction_section, text, method='turn/steer' if active else 'turn/start',
                                         turn_id=active or result['turn']['id'])
@@ -162,6 +166,8 @@ class ProjectSession:
         if params.get('threadId') and self.thread_id and params['threadId'] != self.thread_id:
             return
         if method == 'turn/started':
+            with self.activity_lock:
+                self.active_items.clear()
             self.turn_id = params['turn']['id']
             self.state.event(self.id, 'turn_started', turn_id=self.turn_id)
         elif method == 'turn/completed':
@@ -172,13 +178,17 @@ class ProjectSession:
                 self.state.update(self.id, startup_sent=0)
             if turn['id'] == self.turn_id:
                 self.turn_id = None
+                with self.activity_lock:
+                    self.active_items.clear()
             self.state.event(self.id, 'turn_completed', status=turn['status'], error=turn.get('error'))
         elif method == 'item/agentMessage/delta':
+            self.track_activity({'id': params['itemId'], 'type': 'agentMessage'})
             self.state.event(self.id, 'agent_delta', item_id=params['itemId'], text=params['delta'])
         elif method == 'item/commandExecution/outputDelta':
             self.state.event(self.id, 'command_delta', item_id=params['itemId'], text=params['delta'])
         elif method in ('item/started', 'item/completed'):
             item = params.get('item', {})
+            self.track_activity(item, completed=method == 'item/completed')
             if (method == 'item/completed' and item.get('type') == 'agentMessage' and
                     '[[HARNESS:SHOW_SUMMARY]]' in item.get('text', '') and self.planning):
                 self.planning.open_summary(self.id)
@@ -198,7 +208,36 @@ class ProjectSession:
         elif method == 'connection/closed':
             self.closed = True
             self.turn_id = None
+            with self.activity_lock:
+                self.active_items.clear()
             self.state.event(self.id, 'disconnected', text='Codex 연결이 종료되었습니다. 대화 연결 버튼으로 이어갈 수 있습니다.')
+
+    def track_activity(self, item, *, completed=False):
+        item_id = item.get('id')
+        if not item_id:
+            return
+        kind = {'reasoning': 'thinking', 'agentMessage': 'responding', 'plan': 'planning',
+                'commandExecution': 'command', 'fileChange': 'editing', 'webSearch': 'web_search',
+                'mcpToolCall': 'tool', 'dynamicToolCall': 'tool', 'imageView': 'image_view',
+                'imageGeneration': 'image_generation', 'contextCompaction': 'compacting'}.get(item.get('type'))
+        if kind == 'command':
+            actions = {action.get('type') for action in item.get('commandActions', [])}
+            kind = {frozenset({'read'}): 'reading', frozenset({'search'}): 'file_search',
+                    frozenset({'listFiles'}): 'listing'}.get(frozenset(actions), kind)
+        with self.activity_lock:
+            if completed:
+                self.active_items.pop(item_id, None)
+            elif kind:
+                self.active_items.pop(item_id, None)
+                self.active_items[item_id] = kind
+
+    def activity_status(self):
+        if self.closed or not self.turn_id:
+            return None
+        if self.live_questions:
+            return 'waiting'
+        with self.activity_lock:
+            return next(reversed(self.active_items.values()), 'working')
 
     def on_request(self, message):
         params, method = message.get('params', {}), message['method']

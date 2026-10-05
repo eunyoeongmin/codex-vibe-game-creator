@@ -56,4 +56,21 @@
 
 目前發行的執行檔尚未進行程式碼簽章。請從本儲存庫的 Releases 下載，可使用 `SHA256SUMS.txt` 核對檔案。
 
-版本 **0.1.0** · [更新紀錄](../CHANGELOG.md) · [維護與發行](maintaining.md)
+版本 **0.1.1** · [更新紀錄](../CHANGELOG.md) · [維護與發行](maintaining.md)
+
+## 授權條款與第三方元件
+
+本專案採用 [MIT 授權條款](../LICENSE)。Release 的 ZIP 與安裝程式包含本工具的程式碼和文件。Python 與 Codex 使用既有安裝，或在安裝過程中下載；Python 套件與嵌入模型安裝至共用執行環境。SQLite 透過 Python 使用。Windows PowerShell 與 .NET Framework 是系統相依元件，不包含在發行檔案中。
+
+| 元件 | 版本 / 來源 | 授權條款 |
+|---|---|---|
+| Python | 3.12.10 | [PSF License Agreement](https://docs.python.org/3.12/license.html) |
+| Codex CLI | 0.160.0 | [Apache-2.0](https://github.com/openai/codex/blob/rust-v0.160.0/LICENSE) |
+| Semantica | 0.7.0 | [MIT](https://github.com/semantica-agi/semantica/blob/main/LICENSE) |
+| SQLite | Python runtime | [Public domain](https://www.sqlite.org/copyright.html) |
+| sqlite-vec | 0.1.9 | [MIT](https://github.com/asg017/sqlite-vec/blob/main/LICENSE-MIT) / [Apache-2.0](https://github.com/asg017/sqlite-vec/blob/main/LICENSE-APACHE) |
+| FastEmbed | 0.8.1 | [Apache-2.0](https://github.com/qdrant/fastembed/blob/main/LICENSE) |
+| ONNX Runtime | 1.30.0 | [MIT](https://github.com/microsoft/onnxruntime/blob/main/LICENSE) |
+| sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 | Model | [Apache-2.0](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2) |
+
+固定版本的 60 個 Python 套件之授權條款與聲明檔案位置，請見[第三方元件授權清單](third-party-licenses.md)。各元件保留各自的授權條款，本工具的 MIT 授權條款不會取代它們。

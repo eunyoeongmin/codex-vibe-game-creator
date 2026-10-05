@@ -1,5 +1,6 @@
 """Project routing, UI protocol, and real Codex filesystem isolation checks."""
 from contextlib import closing
+import base64
 import json
 import os
 from pathlib import Path
@@ -9,11 +10,13 @@ import threading
 import unittest
 from unittest.mock import patch, Mock
 from urllib.error import HTTPError
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 from codex_bridge import CodexRpc, RpcError, sandbox_policy
 from dashboard import App, Handler, LocalServer
 from dashboard_session import ProjectSession, QUESTION_TOOL
+from dashboard_state import State
 from instruction_bundle import InstructionBundle
 
 STARTUP_PROMPT = InstructionBundle().render("startup")
@@ -106,6 +109,120 @@ class DashboardTests(unittest.TestCase):
         self.assertFalse((self.root / 'escape.txt').exists())
         with self.assertRaises(HTTPError):
             self.request(server, route, {'path': 'game.txt', 'text': 'stale', 'digest': None})
+
+    def test_image_attachment_preview_and_conversation_history(self):
+        server = self.server()
+        project = self.create()
+        other = self.create('다른 프로젝트')
+        route = f'projects/{project["id"]}/'
+        data = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aG1sAAAAASUVORK5CYII='
+        uploaded = self.request(server, route + 'upload', {'name': '참고.png', 'data': data})['path']
+        preview = self.request(server, route + 'attachment?path=' + quote(uploaded))
+        self.assertEqual(preview, {'mime': 'image/png', 'data': data})
+        for request_route, authorized in (
+                (route + 'attachment?path=' + quote(uploaded), False),
+                (f'projects/{other["id"]}/attachment?path=' + quote(uploaded), True),
+                (route + 'attachment?path=../outside.png', True),
+                (route + 'attachment?path=AGENTS.md', True)):
+            with self.assertRaises(HTTPError):
+                self.request(server, request_route, authorized=authorized)
+        with patch('dashboard_session.CodexRpc', FakeRpc):
+            session = ProjectSession(self.app.state, project['id'], self.root / 'codex')
+            self.app.sessions[project['id']] = session
+            session.connect()
+            self.request(server, route + 'message', {'text': '이 이미지 참고', 'attachments': [uploaded]})
+            inputs = session.rpc.calls[-1][1]['input']
+            self.assertIn({'type': 'localImage', 'path': str(Path(project['path']) / uploaded)}, inputs)
+            events = self.app.state.events(project['id'], 0)
+            event = next(e for e in reversed(events) if e['kind'] == 'user')
+            self.assertEqual(event['attachments'], [uploaded])
+            self.assertEqual((Path(project['path']) / uploaded).read_bytes(), base64.b64decode(data))
+
+    def test_activity_tracks_real_items_and_clears_on_turn_end(self):
+        project = self.create()
+        with patch('dashboard_session.CodexRpc', FakeRpc):
+            session = ProjectSession(self.app.state, project['id'], self.root / 'codex')
+            self.app.sessions[project['id']] = session
+            session.connect()
+            session.on_event('turn/started', {'turn': {'id': 'activity-turn'}})
+            self.assertEqual(session.activity_status(), 'working')
+            for item_type, expected in (('reasoning', 'thinking'), ('agentMessage', 'responding'),
+                                        ('fileChange', 'editing'), ('webSearch', 'web_search'),
+                                        ('mcpToolCall', 'tool'), ('plan', 'planning')):
+                item = {'id': item_type, 'type': item_type}
+                session.on_event('item/started', {'item': item})
+                self.assertEqual(session.activity_status(), expected)
+                session.on_event('item/completed', {'item': item})
+                self.assertEqual(session.activity_status(), 'working')
+            read = {'id': 'read', 'type': 'commandExecution', 'commandActions': [{'type': 'read'}]}
+            session.on_event('item/started', {'item': read})
+            session.on_event('item/started', {'item': {'id': 'edit', 'type': 'fileChange'}})
+            self.assertEqual(session.activity_status(), 'editing')
+            session.on_event('item/completed', {'item': {'id': 'edit', 'type': 'fileChange'}})
+            self.assertEqual(session.activity_status(), 'reading')
+            session.live_questions['question'] = 'rpc-request'
+            self.assertEqual(session.activity_status(), 'waiting')
+            session.live_questions.clear()
+            server = self.server()
+            route = f'projects/{project["id"]}/'
+            self.assertEqual(self.request(server, route + 'events')['activity'], 'reading')
+            self.assertEqual(self.request(server, route + 'message', {'text': '일반 채팅'})['activity'], 'reading')
+            session.on_event('turn/completed', {'turn': {'id': 'activity-turn', 'status': 'completed'}})
+            self.assertIsNone(session.activity_status())
+            self.assertFalse(session.active_items)
+            session.on_event('turn/started', {'turn': {'id': 'next-turn'}})
+            self.assertEqual(session.activity_status(), 'working')
+            session.on_event('connection/closed', {})
+            self.assertIsNone(session.activity_status())
+
+    def test_chat_history_migration_paging_and_live_cursor(self):
+        project = self.create()
+        other = self.create('다른 대화')
+        pid = project['id']
+        # Simulate an old DB with long streaming replies and no display index.
+        original = []
+        for number in range(35):
+            original.append({'kind': 'user', 'text': f'질문 {number}'})
+            original.extend({'kind': 'agent_delta', 'item_id': f'a{number}', 'text': '조각 '}
+                            for _ in range(20))
+            original.append({'kind': 'item', 'phase': 'completed', 'item': {
+                'type': 'agentMessage', 'id': f'a{number}', 'text': f'완성된 답변 {number}'}})
+        original.extend([{'kind': 'user', 'text': '진행 중인 질문'},
+                         {'kind': 'agent_delta', 'item_id': 'active', 'text': '아직 '},
+                         {'kind': 'agent_delta', 'item_id': 'active', 'text': '진행 중'}])
+        with closing(self.app.state.connect()) as db:
+            db.executemany('INSERT INTO events(project_id,data) VALUES(?,?)',
+                           [(pid, json.dumps(e, ensure_ascii=False)) for e in original])
+            db.execute("DELETE FROM settings WHERE key='chat_history_version'")
+            db.commit()
+        self.app.state = State(self.app.state.folder, self.app.state.projects_root)
+        self.app.state.event(other['id'], 'user', text='섞이면 안 되는 메시지')
+        server = self.server()
+        route = f'projects/{pid}/'
+        latest = self.request(server, route + 'history')
+        self.assertEqual(len(latest['events']), 30)
+        self.assertTrue(latest['has_more'])
+        self.assertEqual(latest['events'][-1]['item']['text'], '아직 진행 중')
+        self.assertFalse(any(e['kind'] == 'agent_delta' for e in latest['events']))
+        self.app.state.event(pid, 'agent_delta', item_id='active', text=' 이어짐')
+        live = self.request(server, route + f'events?after={latest["cursor"]}')['events']
+        self.assertEqual(len(live), 1)
+        self.assertEqual(live[0]['text'], ' 이어짐')
+        self.assertEqual(self.app.state.history(pid)['events'][-1]['item']['text'], '아직 진행 중 이어짐')
+        seen = list(latest['events'])
+        page = latest
+        while page['has_more']:
+            page = self.request(server, route + f'history?before={page["before"]}')
+            seen = page['events'] + seen
+        self.assertEqual(len(seen), 72)
+        self.assertEqual(len({event['seq'] for event in seen}), 72)
+        self.assertEqual([e['text'] for e in seen if e['kind'] == 'user'],
+                         [f'질문 {n}' for n in range(35)] + ['진행 중인 질문'])
+        with closing(self.app.state.connect()) as db:
+            self.assertEqual(db.execute('SELECT count(*) FROM events WHERE project_id=?', (pid,)).fetchone()[0],
+                             len(original) + 1)
+        with self.assertRaises(HTTPError):
+            self.request(server, route + 'history', authorized=False)
 
     def test_junction_and_marker_cannot_redirect_project(self):
         project = self.create()
