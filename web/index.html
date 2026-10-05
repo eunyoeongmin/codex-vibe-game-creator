@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex Vibe Game Creator</title>
+  <link rel="stylesheet" href="/style.css"><script src="/i18n.js" defer></script><script src="/app.js" defer></script>
+</head>
+<body>
+  <aside id="left-panel" class="sidebar"><button id="toggle-left" class="panel-toggle" aria-controls="left-panel" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v16 M15 8l-4 4 4 4"/></svg></button><div id="resize-left" class="panel-resizer" role="separator" tabindex="0" aria-orientation="vertical" aria-label="왼쪽 패널 너비 조절"></div>
+    <a class="brand" href="#" id="home-link"><span class="brand-mark">G</span><span>Codex Vibe Game Creator<small>나만의 게임 작업실</small></span></a>
+    <button id="new-project" class="primary new-project">＋ 새 프로젝트</button>
+    <div class="nav-label">내 프로젝트</div><nav id="project-list" aria-label="프로젝트 목록"></nav>
+    <div class="sidebar-bottom"><span class="local-dot"></span> 내 PC에서 실행 중<small><span id="app-version"></span> · <a id="release-link" href="https://github.com/eunyoeongmin/codex-vibe-game-creator/releases/latest" target="_blank" rel="noreferrer">업데이트 다운로드 ↗</a></small><small id="account-label">Codex 연결 확인 중</small><button id="login" class="secondary">Codex 로그인</button><a id="login-link" target="_blank" rel="noreferrer" hidden>로그인 화면 열기 ↗</a><button id="sandbox-setup" hidden>작업 권한 설정 재시도</button><small id="sandbox-status"></small></div>
+  </aside>
+  <main>
+    <header id="top-panel" class="topbar"><button id="toggle-top" class="panel-toggle" aria-controls="top-panel" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16 M8 15l4-4 4 4"/></svg></button><div id="resize-top" class="panel-resizer" role="separator" tabindex="0" aria-orientation="horizontal" aria-label="상단 패널 높이 조절"></div><div><div class="eyebrow">GAME WORKSPACE</div><h1 id="page-title">아이디어가 게임이 되는 곳</h1></div><div class="top-actions"><select id="language" aria-label="화면·대화 언어"><option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option><option value="zh-Hans">简体中文</option><option value="zh-Hant">繁體中文</option></select><button id="toggle-theme" aria-pressed="false">다크 모드</button><button id="usage-button">사용량</button><span id="connection-state" class="pill">프로젝트를 선택하세요</span><button id="folder" hidden>폴더 열기 ↗</button></div></header>
+    <div id="notice" role="status" hidden><span id="notice-text"></span><button id="reconnect" hidden>재연결 시도</button></div>
+    <section id="home">
+      <div class="welcome"><div class="eyebrow">YOUR NEXT GAME STARTS HERE</div><h2>어떤 게임을<br>만들어 보고 싶나요?</h2><p>막연한 아이디어부터 플레이할 수 있는 게임까지.<br>Codex와 함께 방향을 정하고, 만들고, 다듬어 보세요.</p><button id="welcome-create" class="primary">첫 아이디어 시작하기 <span>↗</span></button></div>
+      <div class="workflow"><div><span>01</span><h3>이름 짓기</h3><p>새 프로젝트를 만들고<br>게임의 첫 이름을 붙여 주세요.</p></div><div><span>02</span><h3>함께 구체화하기</h3><p>대화와 선택을 통해<br>원하는 게임의 방향을 정합니다.</p></div><div><span>03</span><h3>만들고 플레이하기</h3><p>파일의 변화와 게임 화면을<br>한 작업실에서 확인합니다.</p></div></div>
+      <div class="section-heading"><h3>이어 만들기</h3><span id="project-count"></span></div><div id="project-cards"></div>
+    </section>
+    <section id="workspace" hidden>
+      <div class="chat-panel"><div class="chat-toolbar"><span><i class="local-dot"></i> Codex</span><select id="model" aria-label="Codex 모델"><option value="">Codex 기본 모델</option></select><label class="effort-label">추론 수준 <select id="effort" aria-label="모델 추론 수준"></select></label><button id="connect">대화 연결</button></div><div class="usage-strip"><span id="quota-brief">사용량 확인 전</span><span id="context-brief">컨텍스트: 응답 대기</span></div>
+        <div id="messages" aria-live="polite"></div><div id="questions"></div>
+        <form id="composer"><div id="attachments"></div><textarea id="message" rows="3" placeholder="원하는 게임이나 바꾸고 싶은 점을 말해 주세요. Shift+Enter로 줄바꿈" aria-label="Codex에게 보낼 메시지"></textarea><div class="composer-actions"><label class="attach-button">＋ 파일 첨부<input id="upload" type="file" multiple hidden></label><span id="working-label"></span><button id="stop" type="button" hidden>작업 중단</button><button id="send" class="primary" type="submit">보내기 ↑</button></div></form>
+      </div>
+      <div id="right-panel" class="inspector"><button id="toggle-right" class="panel-toggle" aria-controls="right-panel" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4v16 M9 8l4 4-4 4"/></svg></button><div id="resize-right" class="panel-resizer" role="separator" tabindex="0" aria-orientation="vertical" aria-label="오른쪽 패널 너비 조절"></div><div class="tabs" role="tablist"><button data-tab="progress" role="tab">진행</button><button data-tab="files" class="active" role="tab">파일</button><button data-tab="records" role="tab">결정 기록</button><button data-tab="preview" role="tab">미리보기</button><button data-tab="environment" role="tab">연결 정보</button></div>
+        <section id="tab-progress" class="tab-content" hidden>
+          <div class="pane-heading"><strong id="progress-title">기획 진행</strong><span id="spec-version"></span></div>
+          <section id="production-progress" hidden>
+            <strong id="milestone-count"></strong><progress id="milestone-bar" max="1" value="0" aria-label="완료한 마일스톤 비율"></progress>
+            <div id="current-milestone" class="record"></div><div id="milestone-list"></div>
+          </section>
+          <details id="planning-details" open><summary>기획 결정</summary>
+            <div class="pane-heading"><strong id="planning-count">확정 — / — 항목</strong></div><progress id="planning-bar" max="1" value="0" aria-label="확정된 카테고리 비율"></progress><div id="planning-checklist"></div>
+            <button id="show-summary">요약 보기</button><section id="planning-summary" class="summary-card" hidden><h3>기획 요약</h3><div id="summary-items"></div><div class="summary-actions"><button id="summary-start" class="primary">이대로 시작</button><button id="summary-more">더 정하기</button></div></section>
+          </details>
+        </section>
+        <section id="tab-files" class="tab-content"><div class="pane-heading"><span>프로젝트 파일</span><button id="refresh-files">새로고침</button></div><div id="file-list"></div><div id="editor-panel" hidden><div class="pane-heading"><span id="file-name"></span><button id="save-file">저장</button></div><textarea id="editor" spellcheck="false" aria-label="파일 내용"></textarea></div></section>
+        <section id="tab-records" class="tab-content" hidden><div class="pane-heading"><span>프로젝트에 저장된 기록</span><button id="refresh-records">새로고침</button></div><div id="records"></div></section>
+        <section id="tab-preview" class="tab-content" hidden><div class="preview-controls"><input id="preview-path" value="index.html" aria-label="미리 볼 HTML 경로"><button id="preview-button">열기 ↗</button></div><p class="muted">HTML 게임을 실행합니다. 빌드가 필요한 게임은 빌드한 HTML 경로를 입력하세요.</p><iframe id="preview-frame" title="게임 미리보기" sandbox="allow-scripts allow-same-origin allow-pointer-lock"></iframe></section>
+        <section id="tab-environment" class="tab-content" hidden><h3>현재 프로젝트 연결</h3><div id="environment"></div><h3>전달한 지침 기록</h3><div id="instruction-history"></div><details><summary>자동으로 보내는 시작 안내</summary><p>새 프로젝트의 첫 대화에서 AGENTS.md를 읽고 어떤 게임을 만들지 묻습니다. 빈 프로젝트의 이전 기록은 조회하지 않으며, 기존 대화를 다시 열 때는 자동 안내를 보내지 않습니다. 실제 전송된 내용은 대화의 ‘자동 시작 안내’에서 확인할 수 있습니다.</p></details></section>
+      </div>
+    </section>
+  </main>
+  <dialog id="create-dialog"><form id="create-form"><div class="eyebrow">NEW PROJECT</div><h2>새 게임의 이름은?</h2><p class="muted">같은 이름을 사용해도 각각 별도의 프로젝트로 보관됩니다.</p><label for="project-name">프로젝트 이름</label><input id="project-name" maxlength="100" required placeholder="예: 별을 모으는 고양이" autocomplete="off"><div class="dialog-actions"><button id="cancel-create" type="button">취소</button><button id="create-submit" class="primary" type="submit">프로젝트 만들기</button></div></form></dialog>
+  <dialog id="usage-dialog"><div class="eyebrow">CODEX USAGE</div><h2>사용량과 컨텍스트</h2><div id="quota-details"></div><h3>현재 대화</h3><div id="context-details" class="muted">프로젝트를 선택하세요.</div><div class="dialog-actions"><button id="refresh-usage">새로고침</button><button id="close-usage" class="primary">닫기</button></div></dialog>
+</body>
+</html>

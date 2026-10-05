@@ -1,0 +1,13 @@
+# Local harness development instructions; not part of the distributed harness.
+/AGENTS.override.md
+/core.md
+/.local/
+/.venv-runtime/
+/.tools/
+/data/
+/dist/
+__pycache__/
+*.pyc
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

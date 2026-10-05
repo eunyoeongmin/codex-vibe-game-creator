@@ -1,0 +1,1418 @@
+{
+  "Codex 기본 모델": {
+    "en": "Default Codex model",
+    "ja": "Codexの既定モデル",
+    "zh-Hans": "Codex 默认模型",
+    "zh-Hant": "Codex 預設模型"
+  },
+  "Codex 로그인": {
+    "en": "Sign in to Codex",
+    "ja": "Codexにログイン",
+    "zh-Hans": "登录 Codex",
+    "zh-Hant": "登入 Codex"
+  },
+  "Codex 로그인 화면에서 로그인을 마친 후 대화 연결을 눌러 주세요.": {
+    "en": "Complete Codex sign-in, then connect to the conversation.",
+    "ja": "Codexへのログイン後、会話に接続してください。",
+    "zh-Hans": "完成 Codex 登录后，请连接对话。",
+    "zh-Hant": "完成 Codex 登入後，請連線對話。"
+  },
+  "Codex 모델": {
+    "en": "Codex model",
+    "ja": "Codexモデル",
+    "zh-Hans": "Codex 模型",
+    "zh-Hant": "Codex 模型"
+  },
+  "Codex 연결 중": {
+    "en": "Connecting to Codex",
+    "ja": "Codexに接続中",
+    "zh-Hans": "正在连接 Codex",
+    "zh-Hant": "正在連線 Codex"
+  },
+  "Codex 연결 확인 중": {
+    "en": "Checking Codex connection",
+    "ja": "Codexの接続を確認中",
+    "zh-Hans": "正在检查 Codex 连接",
+    "zh-Hant": "正在檢查 Codex 連線"
+  },
+  "Codex 연결이 끊어졌습니다.": {
+    "en": "Codex disconnected.",
+    "ja": "Codexとの接続が切れました。",
+    "zh-Hans": "Codex 连接已断开。",
+    "zh-Hant": "Codex 連線已中斷。"
+  },
+  "Codex 작업 중": {
+    "en": "Codex is working",
+    "ja": "Codexが作業中",
+    "zh-Hans": "Codex 正在工作",
+    "zh-Hant": "Codex 正在工作"
+  },
+  "Codex가 불러온 시작 문서": {
+    "en": "Instructions loaded by Codex",
+    "ja": "Codexが読み込んだ開始文書",
+    "zh-Hans": "Codex 已加载的初始指引",
+    "zh-Hant": "Codex 已載入的初始指引"
+  },
+  "Codex가 토큰 정보를 보내면 표시합니다.": {
+    "en": "Token information will appear when Codex reports it.",
+    "ja": "Codexからトークン情報を受信すると表示します。",
+    "zh-Hans": "收到 Codex 的 token 信息后显示。",
+    "zh-Hant": "收到 Codex 的 token 資訊後顯示。"
+  },
+  "Codex에게 보낼 메시지": {
+    "en": "Message to Codex",
+    "ja": "Codexへのメッセージ",
+    "zh-Hans": "发送给 Codex 的消息",
+    "zh-Hant": "傳送給 Codex 的訊息"
+  },
+  "Codex와 함께 방향을 정하고, 만들고, 다듬어 보세요.": {
+    "en": "Plan, build, and refine with Codex.",
+    "ja": "Codexと一緒に方向を決め、作り、磨きましょう。",
+    "zh-Hans": "与 Codex 一起规划、制作并完善游戏。",
+    "zh-Hant": "與 Codex 一起規劃、製作並完善遊戲。"
+  },
+  "HTML 게임을 실행합니다. 빌드가 필요한 게임은 빌드한 HTML 경로를 입력하세요.": {
+    "en": "Run an HTML game. For games requiring a build, enter the built HTML path.",
+    "ja": "HTMLゲームを実行します。ビルドが必要な場合は、生成されたHTMLのパスを入力してください。",
+    "zh-Hans": "运行 HTML 游戏。如果需要构建，请输入构建后的 HTML 路径。",
+    "zh-Hant": "執行 HTML 遊戲。如果需要建置，請輸入建置後的 HTML 路徑。"
+  },
+  "Windows 작업 권한을 준비합니다. 관리자 확인 창이 나타나면 설정을 완료해 주세요.": {
+    "en": "Preparing Windows permissions. Complete the administrator prompt when it appears.",
+    "ja": "Windowsの権限を準備します。管理者の確認画面が出たら設定を完了してください。",
+    "zh-Hans": "正在准备 Windows 权限。出现管理员确认窗口时，请完成设置。",
+    "zh-Hant": "正在準備 Windows 權限。出現系統管理員確認視窗時，請完成設定。"
+  },
+  "start.bat으로 대시보드를 열어 주세요.": {
+    "en": "Open the dashboard using the launcher or start.bat.",
+    "ja": "ランチャーまたはstart.batでダッシュボードを開いてください。",
+    "zh-Hans": "请使用启动器或 start.bat 打开控制台。",
+    "zh-Hant": "請使用啟動器或 start.bat 開啟控制台。"
+  },
+  "같은 이름을 사용해도 각각 별도의 프로젝트로 보관됩니다.": {
+    "en": "Projects are stored separately, even when they share a name.",
+    "ja": "同じ名前でも別々のプロジェクトとして保存します。",
+    "zh-Hans": "即使名称相同，也会保存为独立项目。",
+    "zh-Hant": "即使名稱相同，也會儲存為獨立專案。"
+  },
+  "건너뛰기": {
+    "en": "Skip",
+    "ja": "スキップ",
+    "zh-Hans": "跳过",
+    "zh-Hant": "略過"
+  },
+  "게임 미리보기": {
+    "en": "Game preview",
+    "ja": "ゲームのプレビュー",
+    "zh-Hans": "游戏预览",
+    "zh-Hant": "遊戲預覽"
+  },
+  "게임 제작을 시작하려면 로그인하세요": {
+    "en": "Sign in to start creating games",
+    "ja": "ゲーム制作を始めるにはログインしてください",
+    "zh-Hans": "登录后开始制作游戏",
+    "zh-Hant": "登入後開始製作遊戲"
+  },
+  "게임의 첫 이름을 붙여 주세요.": {
+    "en": "give your game its first name.",
+    "ja": "ゲームに最初の名前を付けましょう。",
+    "zh-Hans": "为游戏起一个名字。",
+    "zh-Hant": "為遊戲取一個名字。"
+  },
+  "결정 기록": {
+    "en": "Decisions",
+    "ja": "決定記録",
+    "zh-Hans": "决策记录",
+    "zh-Hant": "決策紀錄"
+  },
+  "기본값": {
+    "en": "Default",
+    "ja": "既定",
+    "zh-Hans": "默认",
+    "zh-Hant": "預設"
+  },
+  "기획 결정": {
+    "en": "Design decisions",
+    "ja": "企画の決定",
+    "zh-Hans": "设计决策",
+    "zh-Hant": "設計決策"
+  },
+  "기획 요약": {
+    "en": "Design summary",
+    "ja": "企画のまとめ",
+    "zh-Hans": "设计摘要",
+    "zh-Hant": "設計摘要"
+  },
+  "기획 진행": {
+    "en": "Design progress",
+    "ja": "企画の進捗",
+    "zh-Hans": "设计进度",
+    "zh-Hant": "設計進度"
+  },
+  "나": {
+    "en": "You",
+    "ja": "あなた",
+    "zh-Hans": "你",
+    "zh-Hant": "你"
+  },
+  "나만의 게임 작업실": {
+    "en": "Your game workshop",
+    "ja": "自分だけのゲーム工房",
+    "zh-Hans": "你的游戏工作室",
+    "zh-Hant": "你的遊戲工作室"
+  },
+  "낮음": {
+    "en": "Low",
+    "ja": "低",
+    "zh-Hans": "低",
+    "zh-Hant": "低"
+  },
+  "내 PC에서 실행 중": {
+    "en": "Running on your PC",
+    "ja": "このPCで実行中",
+    "zh-Hans": "在本机运行",
+    "zh-Hant": "在本機執行"
+  },
+  "내 프로젝트": {
+    "en": "My projects",
+    "ja": "マイプロジェクト",
+    "zh-Hans": "我的项目",
+    "zh-Hant": "我的專案"
+  },
+  "높음": {
+    "en": "High",
+    "ja": "高",
+    "zh-Hans": "高",
+    "zh-Hant": "高"
+  },
+  "다크 모드": {
+    "en": "Dark mode",
+    "ja": "ダークモード",
+    "zh-Hans": "深色模式",
+    "zh-Hant": "深色模式"
+  },
+  "닫기": {
+    "en": "Close",
+    "ja": "閉じる",
+    "zh-Hans": "关闭",
+    "zh-Hant": "關閉"
+  },
+  "답변 보내기": {
+    "en": "Send answer",
+    "ja": "回答を送信",
+    "zh-Hans": "发送回答",
+    "zh-Hant": "傳送回答"
+  },
+  "답변을 선택하거나 직접 입력해 주세요.": {
+    "en": "Choose an answer or type your own.",
+    "ja": "回答を選ぶか、直接入力してください。",
+    "zh-Hans": "请选择回答或直接输入。",
+    "zh-Hant": "請選擇回答或直接輸入。"
+  },
+  "대기": {
+    "en": "Pending",
+    "ja": "待機",
+    "zh-Hans": "待处理",
+    "zh-Hant": "待處理"
+  },
+  "대시보드 연결이 끊어졌습니다.": {
+    "en": "Dashboard disconnected.",
+    "ja": "ダッシュボードとの接続が切れました。",
+    "zh-Hans": "控制台连接已断开。",
+    "zh-Hant": "控制台連線已中斷。"
+  },
+  "대시보드 지침 버전": {
+    "en": "Dashboard instruction version",
+    "ja": "ダッシュボード指示のバージョン",
+    "zh-Hans": "控制台指引版本",
+    "zh-Hant": "控制台指引版本"
+  },
+  "대시보드 지침 파일": {
+    "en": "Dashboard instruction file",
+    "ja": "ダッシュボード指示ファイル",
+    "zh-Hans": "控制台指引文件",
+    "zh-Hant": "控制台指引檔案"
+  },
+  "대화 ID": {
+    "en": "Conversation ID",
+    "ja": "会話ID",
+    "zh-Hans": "对话 ID",
+    "zh-Hant": "對話 ID"
+  },
+  "대화 연결": {
+    "en": "Connect",
+    "ja": "会話に接続",
+    "zh-Hans": "连接对话",
+    "zh-Hant": "連線對話"
+  },
+  "대화 연결됨": {
+    "en": "Connected",
+    "ja": "接続済み",
+    "zh-Hans": "已连接",
+    "zh-Hant": "已連線"
+  },
+  "대화와 선택을 통해": {
+    "en": "Through conversation and choices,",
+    "ja": "会話と選択を通じて、",
+    "zh-Hans": "通过对话和选择，",
+    "zh-Hant": "透過對話和選擇，"
+  },
+  "더 정하기": {
+    "en": "Keep planning",
+    "ja": "企画を続ける",
+    "zh-Hans": "继续规划",
+    "zh-Hant": "繼續規劃"
+  },
+  "레퍼런스": {
+    "en": "References",
+    "ja": "参考資料",
+    "zh-Hans": "参考资料",
+    "zh-Hant": "參考資料"
+  },
+  "로그인 화면 열기 ↗": {
+    "en": "Open sign-in ↗",
+    "ja": "ログイン画面を開く ↗",
+    "zh-Hans": "打开登录页面 ↗",
+    "zh-Hant": "開啟登入頁面 ↗"
+  },
+  "마일스톤 계획 작성 대기": {
+    "en": "Waiting for milestone plan",
+    "ja": "マイルストーンの計画待ち",
+    "zh-Hans": "等待里程碑计划",
+    "zh-Hant": "等待里程碑計畫"
+  },
+  "마일스톤 기록 확인 필요": {
+    "en": "Milestone records need attention",
+    "ja": "マイルストーン記録の確認が必要です",
+    "zh-Hans": "需要检查里程碑记录",
+    "zh-Hant": "需要檢查里程碑紀錄"
+  },
+  "막연한 아이디어부터 플레이할 수 있는 게임까지.": {
+    "en": "From a rough idea to a playable game.",
+    "ja": "漠然としたアイデアから、遊べるゲームへ。",
+    "zh-Hans": "从模糊的想法到可以玩的游戏。",
+    "zh-Hant": "從模糊的想法到可以玩的遊戲。"
+  },
+  "만들고 플레이하기": {
+    "en": "Build and play",
+    "ja": "作って遊ぶ",
+    "zh-Hans": "制作并游玩",
+    "zh-Hant": "製作並遊玩"
+  },
+  "만들어 보고 싶나요?": {
+    "en": "want to create?",
+    "ja": "作ってみたいですか？",
+    "zh-Hans": "什么样的游戏？",
+    "zh-Hant": "什麼樣的遊戲？"
+  },
+  "매우 높음": {
+    "en": "Very high",
+    "ja": "非常に高い",
+    "zh-Hans": "很高",
+    "zh-Hant": "很高"
+  },
+  "모델": {
+    "en": "Model",
+    "ja": "モデル",
+    "zh-Hans": "模型",
+    "zh-Hant": "模型"
+  },
+  "모델 추론 수준": {
+    "en": "Model reasoning effort",
+    "ja": "モデルの推論レベル",
+    "zh-Hans": "模型推理强度",
+    "zh-Hant": "模型推理強度"
+  },
+  "미결정": {
+    "en": "Undecided",
+    "ja": "未決定",
+    "zh-Hans": "未决定",
+    "zh-Hant": "未決定"
+  },
+  "미리 볼 HTML 경로": {
+    "en": "HTML path to preview",
+    "ja": "プレビューするHTMLのパス",
+    "zh-Hans": "预览 HTML 的路径",
+    "zh-Hant": "預覽 HTML 的路徑"
+  },
+  "미리보기": {
+    "en": "Preview",
+    "ja": "プレビュー",
+    "zh-Hans": "预览",
+    "zh-Hant": "預覽"
+  },
+  "보내기 ↑": {
+    "en": "Send ↑",
+    "ja": "送信 ↑",
+    "zh-Hans": "发送 ↑",
+    "zh-Hant": "傳送 ↑"
+  },
+  "보통": {
+    "en": "Medium",
+    "ja": "中",
+    "zh-Hans": "中",
+    "zh-Hant": "中"
+  },
+  "사용 한도": {
+    "en": "Usage limit",
+    "ja": "利用上限",
+    "zh-Hans": "使用限额",
+    "zh-Hant": "使用額度"
+  },
+  "사용량": {
+    "en": "Usage",
+    "ja": "使用量",
+    "zh-Hans": "使用量",
+    "zh-Hant": "使用量"
+  },
+  "사용량 정보 없음": {
+    "en": "Usage unavailable",
+    "ja": "使用量の情報なし",
+    "zh-Hans": "暂无使用量信息",
+    "zh-Hant": "暫無使用量資訊"
+  },
+  "사용량 확인 전": {
+    "en": "Usage not checked",
+    "ja": "使用量は未確認",
+    "zh-Hans": "尚未查询使用量",
+    "zh-Hant": "尚未查詢使用量"
+  },
+  "사용량과 컨텍스트": {
+    "en": "Usage and context",
+    "ja": "使用量とコンテキスト",
+    "zh-Hans": "使用量与上下文",
+    "zh-Hant": "使用量與上下文"
+  },
+  "사용자 결정": {
+    "en": "User decisions",
+    "ja": "ユーザーの決定",
+    "zh-Hans": "用户决策",
+    "zh-Hant": "使用者決策"
+  },
+  "상단": {
+    "en": "Top",
+    "ja": "上部",
+    "zh-Hans": "顶部",
+    "zh-Hant": "頂部"
+  },
+  "상단 패널 높이 조절": {
+    "en": "Resize top panel",
+    "ja": "上部パネルの高さを変更",
+    "zh-Hans": "调整顶部面板高度",
+    "zh-Hant": "調整頂部面板高度"
+  },
+  "새 게임의 이름은?": {
+    "en": "What is your game's name?",
+    "ja": "新しいゲームの名前は？",
+    "zh-Hans": "新游戏叫什么名字？",
+    "zh-Hant": "新遊戲叫什麼名字？"
+  },
+  "새 프로젝트를 만들고": {
+    "en": "Create a project and",
+    "ja": "新しいプロジェクトを作り、",
+    "zh-Hans": "创建新项目，",
+    "zh-Hant": "建立新專案，"
+  },
+  "새 프로젝트의 첫 대화에서 AGENTS.md를 읽고 어떤 게임을 만들지 묻습니다. 빈 프로젝트의 이전 기록은 조회하지 않으며, 기존 대화를 다시 열 때는 자동 안내를 보내지 않습니다. 실제 전송된 내용은 대화의 ‘자동 시작 안내’에서 확인할 수 있습니다.": {
+    "en": "The first conversation reads AGENTS.md and asks what game you want to make. Empty projects skip previous-record lookup. Reopening a conversation does not send another startup message. You can inspect the original startup message in the conversation.",
+    "ja": "最初の会話でAGENTS.mdを読み、作りたいゲームを尋ねます。空のプロジェクトでは過去の記録を検索しません。会話を再開しても開始案内は再送しません。送信内容は会話内の開始案内で確認できます。",
+    "zh-Hans": "新项目首次对话会读取 AGENTS.md，并询问你想制作什么游戏。空项目不会查询历史记录。重新打开已有对话不会再次发送启动消息。原始消息可在对话的自动启动指引中查看。",
+    "zh-Hant": "新專案首次對話會讀取 AGENTS.md，並詢問你想製作什麼遊戲。空專案不會查詢歷史紀錄。重新開啟既有對話不會再次傳送啟動訊息。原始訊息可在對話的自動啟動指引中查看。"
+  },
+  "새로고침": {
+    "en": "Refresh",
+    "ja": "更新",
+    "zh-Hans": "刷新",
+    "zh-Hant": "重新整理"
+  },
+  "세부 진행 기록 없음": {
+    "en": "No detailed progress recorded",
+    "ja": "詳細な進捗記録なし",
+    "zh-Hans": "暂无详细进度记录",
+    "zh-Hant": "暫無詳細進度紀錄"
+  },
+  "쓰기 허용 폴더": {
+    "en": "Writable folders",
+    "ja": "書き込み可能なフォルダー",
+    "zh-Hans": "可写入的文件夹",
+    "zh-Hant": "可寫入的資料夾"
+  },
+  "아이디어가 게임이 되는 곳": {
+    "en": "Where ideas become games",
+    "ja": "アイデアがゲームになる場所",
+    "zh-Hans": "让想法成为游戏",
+    "zh-Hant": "讓想法成為遊戲"
+  },
+  "아직 생성되지 않음": {
+    "en": "Not created yet",
+    "ja": "未作成",
+    "zh-Hans": "尚未创建",
+    "zh-Hant": "尚未建立"
+  },
+  "아직 프로젝트가 없습니다. 이름을 정해 첫 작업실을 만들어 보세요.": {
+    "en": "No projects yet. Name your first game to open a workshop.",
+    "ja": "まだプロジェクトがありません。名前を付けて最初の工房を作りましょう。",
+    "zh-Hans": "还没有项目。为第一款游戏命名，创建工作室吧。",
+    "zh-Hant": "還沒有專案。為第一款遊戲命名，建立工作室吧。"
+  },
+  "어떤 게임을": {
+    "en": "What game do you",
+    "ja": "どんなゲームを",
+    "zh-Hans": "你想制作",
+    "zh-Hant": "你想製作"
+  },
+  "없음": {
+    "en": "None",
+    "ja": "なし",
+    "zh-Hans": "无",
+    "zh-Hant": "無"
+  },
+  "연결 대기": {
+    "en": "Not connected",
+    "ja": "未接続",
+    "zh-Hans": "等待连接",
+    "zh-Hant": "等待連線"
+  },
+  "연결 시 적용": {
+    "en": "Applied on connection",
+    "ja": "接続時に適用",
+    "zh-Hans": "连接时应用",
+    "zh-Hant": "連線時套用"
+  },
+  "연결 전": {
+    "en": "Not connected",
+    "ja": "未接続",
+    "zh-Hans": "尚未连接",
+    "zh-Hant": "尚未連線"
+  },
+  "연결 정보": {
+    "en": "Connection",
+    "ja": "接続情報",
+    "zh-Hans": "连接信息",
+    "zh-Hant": "連線資訊"
+  },
+  "연결 후 표시": {
+    "en": "Available after connecting",
+    "ja": "接続後に表示",
+    "zh-Hans": "连接后显示",
+    "zh-Hant": "連線後顯示"
+  },
+  "열기 ↗": {
+    "en": "Open ↗",
+    "ja": "開く ↗",
+    "zh-Hans": "打开 ↗",
+    "zh-Hant": "開啟 ↗"
+  },
+  "예: 별을 모으는 고양이": {
+    "en": "e.g. The Star-Collecting Cat",
+    "ja": "例：星を集める猫",
+    "zh-Hans": "例如：收集星星的猫",
+    "zh-Hant": "例如：收集星星的貓"
+  },
+  "오른쪽": {
+    "en": "Right",
+    "ja": "右",
+    "zh-Hans": "右侧",
+    "zh-Hant": "右側"
+  },
+  "오른쪽 패널 너비 조절": {
+    "en": "Resize right panel",
+    "ja": "右パネルの幅を変更",
+    "zh-Hans": "调整右侧面板宽度",
+    "zh-Hant": "調整右側面板寬度"
+  },
+  "완료": {
+    "en": "Done",
+    "ja": "完了",
+    "zh-Hans": "已完成",
+    "zh-Hant": "已完成"
+  },
+  "완료한 마일스톤 비율": {
+    "en": "Completed milestone ratio",
+    "ja": "完了したマイルストーンの割合",
+    "zh-Hans": "已完成里程碑比例",
+    "zh-Hant": "已完成里程碑比例"
+  },
+  "왼쪽": {
+    "en": "Left",
+    "ja": "左",
+    "zh-Hans": "左侧",
+    "zh-Hant": "左側"
+  },
+  "왼쪽 패널 너비 조절": {
+    "en": "Resize left panel",
+    "ja": "左パネルの幅を変更",
+    "zh-Hans": "调整左侧面板宽度",
+    "zh-Hant": "調整左側面板寬度"
+  },
+  "요약 보기": {
+    "en": "View summary",
+    "ja": "まとめを見る",
+    "zh-Hans": "查看摘要",
+    "zh-Hant": "查看摘要"
+  },
+  "요청에 실패했습니다.": {
+    "en": "Request failed.",
+    "ja": "リクエストに失敗しました。",
+    "zh-Hans": "请求失败。",
+    "zh-Hant": "請求失敗。"
+  },
+  "원문과 근거 보기": {
+    "en": "View original text and reasoning",
+    "ja": "原文と根拠を見る",
+    "zh-Hans": "查看原文和依据",
+    "zh-Hant": "查看原文和依據"
+  },
+  "원하는 게임의 방향을 정합니다.": {
+    "en": "decide what you want your game to be.",
+    "ja": "作りたいゲームの方向を決めます。",
+    "zh-Hans": "确定你想要的游戏方向。",
+    "zh-Hant": "決定你想要的遊戲方向。"
+  },
+  "원하는 게임이나 바꾸고 싶은 점을 말해 주세요. Shift+Enter로 줄바꿈": {
+    "en": "Describe your game or a change. Shift+Enter for a new line.",
+    "ja": "作りたいゲームや変更点を教えてください。Shift+Enterで改行",
+    "zh-Hans": "描述想做的游戏或修改内容。Shift+Enter 换行",
+    "zh-Hant": "描述想做的遊戲或修改內容。Shift+Enter 換行"
+  },
+  "이대로 시작": {
+    "en": "Start with this",
+    "ja": "この内容で開始",
+    "zh-Hans": "按此开始",
+    "zh-Hant": "依此開始"
+  },
+  "이름 짓기": {
+    "en": "Name it",
+    "ja": "名前を付ける",
+    "zh-Hans": "起名",
+    "zh-Hant": "命名"
+  },
+  "이어 만들기": {
+    "en": "Continue creating",
+    "ja": "制作を続ける",
+    "zh-Hans": "继续制作",
+    "zh-Hant": "繼續製作"
+  },
+  "자동 시작 안내를 보냈습니다": {
+    "en": "Automatic startup message",
+    "ja": "自動開始メッセージ",
+    "zh-Hans": "自动启动消息",
+    "zh-Hant": "自動啟動訊息"
+  },
+  "자동으로 보내는 시작 안내": {
+    "en": "Automatic startup instructions",
+    "ja": "自動送信される開始案内",
+    "zh-Hans": "自动发送的启动指引",
+    "zh-Hant": "自動傳送的啟動指引"
+  },
+  "작업 결정": {
+    "en": "Work decisions",
+    "ja": "作業上の決定",
+    "zh-Hans": "制作决策",
+    "zh-Hant": "製作決策"
+  },
+  "작업 권한 설정 재시도": {
+    "en": "Retry permission setup",
+    "ja": "権限設定を再試行",
+    "zh-Hans": "重试权限设置",
+    "zh-Hant": "重試權限設定"
+  },
+  "작업 권한 자동 설정 중 · Windows 관리자 확인 창을 완료해 주세요.": {
+    "en": "Setting up permissions · Complete the Windows administrator prompt.",
+    "ja": "権限を設定中 · Windowsの管理者確認を完了してください。",
+    "zh-Hans": "正在设置权限 · 请完成 Windows 管理员确认。",
+    "zh-Hant": "正在設定權限 · 請完成 Windows 系統管理員確認。"
+  },
+  "작업 권한 확인 중": {
+    "en": "Checking permissions",
+    "ja": "権限を確認中",
+    "zh-Hans": "正在检查权限",
+    "zh-Hant": "正在檢查權限"
+  },
+  "작업 안내": {
+    "en": "Activity",
+    "ja": "作業案内",
+    "zh-Hans": "工作提示",
+    "zh-Hant": "工作提示"
+  },
+  "작업 중단": {
+    "en": "Stop",
+    "ja": "作業を停止",
+    "zh-Hans": "停止工作",
+    "zh-Hant": "停止工作"
+  },
+  "작업 중에도 메시지를 보낼 수 있어요": {
+    "en": "You can send messages while work continues",
+    "ja": "作業中もメッセージを送信できます",
+    "zh-Hans": "工作进行中也可以发送消息",
+    "zh-Hant": "工作進行中也可以傳送訊息"
+  },
+  "작업실 열기 ↗": {
+    "en": "Open workshop ↗",
+    "ja": "工房を開く ↗",
+    "zh-Hans": "打开工作室 ↗",
+    "zh-Hant": "開啟工作室 ↗"
+  },
+  "재연결 시도": {
+    "en": "Reconnect",
+    "ja": "再接続",
+    "zh-Hans": "重新连接",
+    "zh-Hant": "重新連線"
+  },
+  "저장": {
+    "en": "Save",
+    "ja": "保存",
+    "zh-Hans": "保存",
+    "zh-Hant": "儲存"
+  },
+  "저장된 기록이 없습니다.": {
+    "en": "No saved records.",
+    "ja": "保存された記録はありません。",
+    "zh-Hans": "暂无保存的记录。",
+    "zh-Hant": "暫無儲存的紀錄。"
+  },
+  "전달한 지침 기록": {
+    "en": "Sent instructions",
+    "ja": "送信した指示の記録",
+    "zh-Hans": "已发送的指引",
+    "zh-Hant": "已傳送的指引"
+  },
+  "전체 마일스톤 완료": {
+    "en": "All milestones complete",
+    "ja": "すべてのマイルストーンが完了",
+    "zh-Hans": "所有里程碑已完成",
+    "zh-Hant": "所有里程碑已完成"
+  },
+  "접기": {
+    "en": "Collapse",
+    "ja": "折りたたむ",
+    "zh-Hans": "收起",
+    "zh-Hant": "收合"
+  },
+  "정보 없음": {
+    "en": "Unavailable",
+    "ja": "情報なし",
+    "zh-Hans": "暂无信息",
+    "zh-Hant": "暫無資訊"
+  },
+  "제안": {
+    "en": "Proposed",
+    "ja": "提案",
+    "zh-Hans": "提案",
+    "zh-Hant": "提案"
+  },
+  "제작 진행": {
+    "en": "Production progress",
+    "ja": "制作の進捗",
+    "zh-Hans": "制作进度",
+    "zh-Hant": "製作進度"
+  },
+  "중단": {
+    "en": "Blocked",
+    "ja": "停止中",
+    "zh-Hans": "已阻塞",
+    "zh-Hant": "已受阻"
+  },
+  "직접 입력할 수도 있어요": {
+    "en": "You can also type your own answer",
+    "ja": "直接入力もできます",
+    "zh-Hans": "也可以直接输入答案",
+    "zh-Hant": "也可以直接輸入答案"
+  },
+  "진행": {
+    "en": "Progress",
+    "ja": "進捗",
+    "zh-Hans": "进度",
+    "zh-Hant": "進度"
+  },
+  "진행 중": {
+    "en": "In progress",
+    "ja": "進行中",
+    "zh-Hans": "进行中",
+    "zh-Hant": "進行中"
+  },
+  "진행 중인 마일스톤 없음": {
+    "en": "No active milestone",
+    "ja": "進行中のマイルストーンなし",
+    "zh-Hans": "没有进行中的里程碑",
+    "zh-Hant": "沒有進行中的里程碑"
+  },
+  "첨부는 16MB 이하로 선택하세요.": {
+    "en": "Attachments must be 16 MB or smaller.",
+    "ja": "添付ファイルは16MB以下にしてください。",
+    "zh-Hans": "附件不得超过 16MB。",
+    "zh-Hant": "附件不得超過 16MB。"
+  },
+  "첫 아이디어 시작하기": {
+    "en": "Start your first idea",
+    "ja": "最初のアイデアを始める",
+    "zh-Hans": "开始第一个创意",
+    "zh-Hant": "開始第一個創意"
+  },
+  "최대": {
+    "en": "Maximum",
+    "ja": "最大",
+    "zh-Hans": "最大",
+    "zh-Hant": "最大"
+  },
+  "최소": {
+    "en": "Minimal",
+    "ja": "最小",
+    "zh-Hans": "最小",
+    "zh-Hant": "最小"
+  },
+  "추론 수준": {
+    "en": "Reasoning effort",
+    "ja": "推論レベル",
+    "zh-Hans": "推理强度",
+    "zh-Hant": "推理強度"
+  },
+  "취소": {
+    "en": "Cancel",
+    "ja": "キャンセル",
+    "zh-Hans": "取消",
+    "zh-Hant": "取消"
+  },
+  "컨텍스트: 응답 대기": {
+    "en": "Context: awaiting response",
+    "ja": "コンテキスト：応答待ち",
+    "zh-Hans": "上下文：等待回复",
+    "zh-Hant": "上下文：等待回覆"
+  },
+  "크레딧: 무제한": {
+    "en": "Credits: unlimited",
+    "ja": "クレジット：無制限",
+    "zh-Hans": "额度：无限",
+    "zh-Hant": "額度：無限"
+  },
+  "파일": {
+    "en": "Files",
+    "ja": "ファイル",
+    "zh-Hans": "文件",
+    "zh-Hant": "檔案"
+  },
+  "파일 내용": {
+    "en": "File contents",
+    "ja": "ファイルの内容",
+    "zh-Hans": "文件内容",
+    "zh-Hant": "檔案內容"
+  },
+  "파일을 저장했습니다.": {
+    "en": "File saved.",
+    "ja": "ファイルを保存しました。",
+    "zh-Hans": "文件已保存。",
+    "zh-Hant": "檔案已儲存。"
+  },
+  "파일의 변화와 게임 화면을": {
+    "en": "See file changes and your game",
+    "ja": "ファイルの変更とゲーム画面を、",
+    "zh-Hans": "在一个工作室中查看",
+    "zh-Hant": "在同一個工作室中查看"
+  },
+  "펼치기": {
+    "en": "Expand",
+    "ja": "展開",
+    "zh-Hans": "展开",
+    "zh-Hant": "展開"
+  },
+  "폴더 밖 쓰기 승인": {
+    "en": "Writes outside the project",
+    "ja": "プロジェクト外への書き込み",
+    "zh-Hans": "项目外写入权限",
+    "zh-Hant": "專案外寫入權限"
+  },
+  "폴더 열기 ↗": {
+    "en": "Open folder ↗",
+    "ja": "フォルダーを開く ↗",
+    "zh-Hans": "打开文件夹 ↗",
+    "zh-Hant": "開啟資料夾 ↗"
+  },
+  "프로젝트 만들기": {
+    "en": "Create project",
+    "ja": "プロジェクトを作成",
+    "zh-Hans": "创建项目",
+    "zh-Hant": "建立專案"
+  },
+  "프로젝트 목록": {
+    "en": "Project list",
+    "ja": "プロジェクト一覧",
+    "zh-Hans": "项目列表",
+    "zh-Hant": "專案清單"
+  },
+  "프로젝트 이름": {
+    "en": "Project name",
+    "ja": "プロジェクト名",
+    "zh-Hans": "项目名称",
+    "zh-Hant": "專案名稱"
+  },
+  "프로젝트 파일": {
+    "en": "Project files",
+    "ja": "プロジェクトファイル",
+    "zh-Hans": "项目文件",
+    "zh-Hant": "專案檔案"
+  },
+  "프로젝트 폴더": {
+    "en": "Project folder",
+    "ja": "プロジェクトフォルダー",
+    "zh-Hans": "项目文件夹",
+    "zh-Hant": "專案資料夾"
+  },
+  "프로젝트를 선택하세요": {
+    "en": "Select a project",
+    "ja": "プロジェクトを選択してください",
+    "zh-Hans": "请选择项目",
+    "zh-Hant": "請選擇專案"
+  },
+  "프로젝트를 선택하세요.": {
+    "en": "Select a project.",
+    "ja": "プロジェクトを選択してください。",
+    "zh-Hans": "请选择项目。",
+    "zh-Hant": "請選擇專案。"
+  },
+  "프로젝트에 저장된 기록": {
+    "en": "Project records",
+    "ja": "プロジェクトの記録",
+    "zh-Hans": "项目记录",
+    "zh-Hant": "專案紀錄"
+  },
+  "한 작업실에서 확인합니다.": {
+    "en": "together in one workshop.",
+    "ja": "ひとつの工房で確認できます。",
+    "zh-Hans": "文件变化和游戏画面。",
+    "zh-Hant": "檔案變更和遊戲畫面。"
+  },
+  "함께 구체화하기": {
+    "en": "Shape your idea",
+    "ja": "一緒に具体化する",
+    "zh-Hans": "一起完善想法",
+    "zh-Hant": "一起完善想法"
+  },
+  "허용하지 않음": {
+    "en": "Not allowed",
+    "ja": "許可しない",
+    "zh-Hans": "不允许",
+    "zh-Hant": "不允許"
+  },
+  "현재 대화": {
+    "en": "Current conversation",
+    "ja": "現在の会話",
+    "zh-Hans": "当前对话",
+    "zh-Hant": "目前對話"
+  },
+  "현재 마일스톤의 완료 작업 비율": {
+    "en": "Completed tasks in the current milestone",
+    "ja": "現在のマイルストーン内の完了作業の割合",
+    "zh-Hans": "当前里程碑的任务完成比例",
+    "zh-Hant": "目前里程碑的工作完成比例"
+  },
+  "현재 사용 한도에 도달했습니다.": {
+    "en": "You have reached the current usage limit.",
+    "ja": "現在の利用上限に達しました。",
+    "zh-Hans": "已达到当前使用限额。",
+    "zh-Hant": "已達到目前使用額度。"
+  },
+  "현재 프로젝트 연결": {
+    "en": "Current project connection",
+    "ja": "現在のプロジェクト接続",
+    "zh-Hans": "当前项目连接",
+    "zh-Hant": "目前專案連線"
+  },
+  "화이트 모드": {
+    "en": "Light mode",
+    "ja": "ライトモード",
+    "zh-Hans": "浅色模式",
+    "zh-Hant": "淺色模式"
+  },
+  "확정": {
+    "en": "Confirmed",
+    "ja": "確定",
+    "zh-Hans": "已确认",
+    "zh-Hant": "已確認"
+  },
+  "확정 — / — 항목": {
+    "en": "Confirmed — / — categories",
+    "ja": "確定 — / — 項目",
+    "zh-Hans": "已确认 — / — 项",
+    "zh-Hant": "已確認 — / — 項"
+  },
+  "확정된 카테고리 비율": {
+    "en": "Confirmed category ratio",
+    "ja": "確定したカテゴリーの割合",
+    "zh-Hans": "已确认类别比例",
+    "zh-Hant": "已確認類別比例"
+  },
+  "＋ 새 프로젝트": {
+    "en": "＋ New project",
+    "ja": "＋ 新しいプロジェクト",
+    "zh-Hans": "＋ 新建项目",
+    "zh-Hant": "＋ 新增專案"
+  },
+  "＋ 파일 첨부": {
+    "en": "＋ Attach file",
+    "ja": "＋ ファイルを添付",
+    "zh-Hans": "＋ 添加附件",
+    "zh-Hant": "＋ 附加檔案"
+  },
+  "장르": {
+    "en": "Genre",
+    "ja": "ジャンル",
+    "zh-Hans": "类型",
+    "zh-Hant": "類型"
+  },
+  "시점": {
+    "en": "Camera",
+    "ja": "視点",
+    "zh-Hans": "视角",
+    "zh-Hant": "視角"
+  },
+  "화풍": {
+    "en": "Art style",
+    "ja": "画風",
+    "zh-Hans": "美术风格",
+    "zh-Hant": "美術風格"
+  },
+  "분위기·세계관": {
+    "en": "Mood and world",
+    "ja": "雰囲気・世界観",
+    "zh-Hans": "氛围与世界观",
+    "zh-Hant": "氛圍與世界觀"
+  },
+  "핵심 루프": {
+    "en": "Core loop",
+    "ja": "コアループ",
+    "zh-Hans": "核心循环",
+    "zh-Hant": "核心循環"
+  },
+  "플랫폼·입력": {
+    "en": "Platform and controls",
+    "ja": "プラットフォーム・操作",
+    "zh-Hans": "平台与操作",
+    "zh-Hant": "平台與操作"
+  },
+  "범위·분량": {
+    "en": "Scope and content",
+    "ja": "規模・分量",
+    "zh-Hans": "规模与内容量",
+    "zh-Hant": "規模與內容量"
+  },
+  "기술 스택": {
+    "en": "Technology",
+    "ja": "技術構成",
+    "zh-Hans": "技术栈",
+    "zh-Hant": "技術組合"
+  },
+  "색감": {
+    "en": "Color palette",
+    "ja": "色使い",
+    "zh-Hans": "配色",
+    "zh-Hant": "配色"
+  },
+  "제작 목적·기타": {
+    "en": "Purpose and other",
+    "ja": "制作目的・その他",
+    "zh-Hans": "制作目的与其他",
+    "zh-Hant": "製作目的與其他"
+  },
+  "{0} 패널 {1}": {
+    "en": "{0} panel: {1}",
+    "ja": "{0}パネル：{1}",
+    "zh-Hans": "{0}面板：{1}",
+    "zh-Hant": "{0}面板：{1}"
+  },
+  "{0}개 프로젝트": {
+    "en": "{0} projects",
+    "ja": "{0}件のプロジェクト",
+    "zh-Hans": "{0} 个项目",
+    "zh-Hant": "{0} 個專案"
+  },
+  "Codex 연결됨 · {0}": {
+    "en": "Codex connected · {0}",
+    "ja": "Codex接続済み · {0}",
+    "zh-Hans": "Codex 已连接 · {0}",
+    "zh-Hant": "Codex 已連線 · {0}"
+  },
+  "확정 {0} / {1} 항목": {
+    "en": "Confirmed {0} / {1} categories",
+    "ja": "確定 {0} / {1} 項目",
+    "zh-Hans": "已确认 {0} / {1} 项",
+    "zh-Hant": "已確認 {0} / {1} 項"
+  },
+  "마일스톤 완료 {0} / {1}": {
+    "en": "Milestones complete {0} / {1}",
+    "ja": "マイルストーン完了 {0} / {1}",
+    "zh-Hans": "里程碑已完成 {0} / {1}",
+    "zh-Hant": "里程碑已完成 {0} / {1}"
+  },
+  "완료 작업 {0} / {1}": {
+    "en": "Tasks complete {0} / {1}",
+    "ja": "完了した作業 {0} / {1}",
+    "zh-Hans": "任务已完成 {0} / {1}",
+    "zh-Hant": "工作已完成 {0} / {1}"
+  },
+  "최근 기록: {0}": {
+    "en": "Last update: {0}",
+    "ja": "最終記録：{0}",
+    "zh-Hans": "最近更新：{0}",
+    "zh-Hant": "最近更新：{0}"
+  },
+  "완료 조건: {0}": {
+    "en": "Done when: {0}",
+    "ja": "完了条件：{0}",
+    "zh-Hans": "完成条件：{0}",
+    "zh-Hant": "完成條件：{0}"
+  },
+  "제외: {0}": {
+    "en": "Out of scope: {0}",
+    "ja": "対象外：{0}",
+    "zh-Hans": "不包含：{0}",
+    "zh-Hant": "不包含：{0}"
+  },
+  "{0}일": {
+    "en": "{0} days",
+    "ja": "{0}日",
+    "zh-Hans": "{0} 天",
+    "zh-Hant": "{0} 天"
+  },
+  "{0}시간": {
+    "en": "{0} hours",
+    "ja": "{0}時間",
+    "zh-Hans": "{0} 小时",
+    "zh-Hant": "{0} 小時"
+  },
+  "{0}분": {
+    "en": "{0} minutes",
+    "ja": "{0}分",
+    "zh-Hans": "{0} 分钟",
+    "zh-Hant": "{0} 分鐘"
+  },
+  "{0} 한도 · {1}% 남음": {
+    "en": "{0} limit · {1}% remaining",
+    "ja": "{0}の上限 · 残り{1}%",
+    "zh-Hans": "{0} 限额 · 剩余 {1}%",
+    "zh-Hant": "{0} 額度 · 剩餘 {1}%"
+  },
+  "리셋: {0}": {
+    "en": "Resets: {0}",
+    "ja": "リセット：{0}",
+    "zh-Hans": "重置：{0}",
+    "zh-Hant": "重設：{0}"
+  },
+  "{0} {1}% 남음": {
+    "en": "{0}: {1}% remaining",
+    "ja": "{0}：残り{1}%",
+    "zh-Hans": "{0} 剩余 {1}%",
+    "zh-Hant": "{0} 剩餘 {1}%"
+  },
+  "크레딧 잔액: {0}": {
+    "en": "Credit balance: {0}",
+    "ja": "クレジット残高：{0}",
+    "zh-Hans": "剩余额度：{0}",
+    "zh-Hant": "剩餘額度：{0}"
+  },
+  "컨텍스트 {0} / {1}": {
+    "en": "Context {0} / {1}",
+    "ja": "コンテキスト {0} / {1}",
+    "zh-Hans": "上下文 {0} / {1}",
+    "zh-Hant": "上下文 {0} / {1}"
+  },
+  "다음 작업부터 {0} / 추론 수준 {1}을 사용합니다.": {
+    "en": "Next turn: {0} / reasoning effort {1}.",
+    "ja": "次の作業から{0} / 推論レベル{1}を使用します。",
+    "zh-Hans": "下一轮将使用 {0} / 推理强度 {1}。",
+    "zh-Hant": "下一輪將使用 {0} / 推理強度 {1}。"
+  },
+  "화면·대화 언어": {
+    "en": "Interface and conversation language",
+    "ja": "画面・会話の言語",
+    "zh-Hans": "界面与对话语言",
+    "zh-Hant": "介面與對話語言"
+  },
+  "대화 언어는 다음 작업부터 적용됩니다.": {
+    "en": "The conversation language applies from the next turn.",
+    "ja": "会話の言語は次の作業から適用されます。",
+    "zh-Hans": "对话语言将在下一轮生效。",
+    "zh-Hant": "對話語言將在下一輪生效。"
+  },
+  "버전: {0}": {
+    "en": "Version: {0}",
+    "ja": "バージョン：{0}",
+    "zh-Hans": "版本：{0}",
+    "zh-Hant": "版本：{0}"
+  },
+  "시각: {0}": {
+    "en": "Time: {0}",
+    "ja": "日時：{0}",
+    "zh-Hans": "时间：{0}",
+    "zh-Hant": "時間：{0}"
+  },
+  "프로젝트: {0}": {
+    "en": "Project: {0}",
+    "ja": "プロジェクト：{0}",
+    "zh-Hans": "项目：{0}",
+    "zh-Hant": "專案：{0}"
+  },
+  "요약 화면에서 이대로 시작 선택": {
+    "en": "Selected Start with this on the summary screen",
+    "ja": "まとめ画面で「この内容で開始」を選択",
+    "zh-Hans": "在摘要页面选择“按此开始”",
+    "zh-Hant": "在摘要畫面選擇「依此開始」"
+  },
+  "업데이트 다운로드 ↗": {
+    "en": "Download updates ↗",
+    "ja": "更新をダウンロード ↗",
+    "zh-Hans": "下载更新 ↗",
+    "zh-Hant": "下載更新 ↗"
+  },
+  " 직접 입력": {
+    "en": " custom answer",
+    "ja": " 自由入力",
+    "zh-Hans": " 自定义回答",
+    "zh-Hant": " 自訂回答"
+  },
+  "실패 · ": {
+    "en": "Failed · ",
+    "ja": "失敗 · ",
+    "zh-Hans": "失败 · ",
+    "zh-Hant": "失敗 · "
+  },
+  "완료 · ": {
+    "en": "Done · ",
+    "ja": "完了 · ",
+    "zh-Hans": "完成 · ",
+    "zh-Hant": "完成 · "
+  },
+  "진행 · ": {
+    "en": "In progress · ",
+    "ja": "進行 · ",
+    "zh-Hans": "进行中 · ",
+    "zh-Hant": "進行中 · "
+  },
+  "최근 입력: {0} 토큰\n컨텍스트 한도: {1} 토큰\n최근 출력: {2} 토큰\n대화 누적 사용: {3} 토큰\n최근 요청 기준이며, 컨텍스트 압축 후에는 입력량이 달라집니다.": {
+    "en": "Latest input: {0} tokens\nContext limit: {1} tokens\nLatest output: {2} tokens\nConversation total: {3} tokens\nBased on the latest request. Input size changes after context compaction.",
+    "ja": "直近の入力：{0}トークン\nコンテキスト上限：{1}トークン\n直近の出力：{2}トークン\n会話の累計：{3}トークン\n直近のリクエストに基づきます。圧縮後は入力量が変わります。",
+    "zh-Hans": "最近输入：{0} tokens\n上下文上限：{1} tokens\n最近输出：{2} tokens\n对话累计：{3} tokens\n基于最近一次请求。上下文压缩后，输入量会变化。",
+    "zh-Hant": "最近輸入：{0} tokens\n上下文上限：{1} tokens\n最近輸出：{2} tokens\n對話累計：{3} tokens\n依據最近一次請求。上下文壓縮後，輸入量會變化。"
+  },
+  "파일: {0}\n파일 SHA-256: {1}\n본문 SHA-256: {2}\n대화: {3}\n턴: {4}\n전달: {5}\n\n{6}": {
+    "en": "File: {0}\nFile SHA-256: {1}\nText SHA-256: {2}\nConversation: {3}\nTurn: {4}\nMethod: {5}\n\n{6}",
+    "ja": "ファイル：{0}\nファイルSHA-256：{1}\n本文SHA-256：{2}\n会話：{3}\nターン：{4}\n送信方法：{5}\n\n{6}",
+    "zh-Hans": "文件：{0}\n文件 SHA-256：{1}\n正文 SHA-256：{2}\n对话：{3}\n轮次：{4}\n发送方式：{5}\n\n{6}",
+    "zh-Hant": "檔案：{0}\n檔案 SHA-256：{1}\n本文 SHA-256：{2}\n對話：{3}\n輪次：{4}\n傳送方式：{5}\n\n{6}"
+  },
+  "Codex 모델 목록에 있는 모델을 선택하세요.": {
+    "en": "Choose a model from the Codex model list.",
+    "ja": "Codexの一覧からモデルを選んでください。",
+    "zh-Hans": "请选择 Codex 列表中的模型。",
+    "zh-Hant": "請選擇 Codex 清單中的模型。"
+  },
+  "선택한 모델이 지원하는 추론 수준을 선택하세요.": {
+    "en": "Choose a reasoning effort supported by this model.",
+    "ja": "モデルが対応する推論レベルを選んでください。",
+    "zh-Hans": "请选择此模型支持的推理强度。",
+    "zh-Hant": "請選擇此模型支援的推理強度。"
+  },
+  "대화 연결 버튼을 눌러 이 프로젝트에 연결하세요.": {
+    "en": "Connect to this project's conversation first.",
+    "ja": "このプロジェクトの会話に接続してください。",
+    "zh-Hans": "请先连接此项目的对话。",
+    "zh-Hant": "請先連線此專案的對話。"
+  },
+  "미리 볼 HTML 파일을 선택하세요.": {
+    "en": "Choose an HTML file to preview.",
+    "ja": "プレビューするHTMLファイルを選んでください。",
+    "zh-Hans": "请选择要预览的 HTML 文件。",
+    "zh-Hant": "請選擇要預覽的 HTML 檔案。"
+  },
+  "먼저 대시보드의 Codex 로그인 버튼으로 로그인하세요.": {
+    "en": "Sign in using the dashboard's Codex sign-in button first.",
+    "ja": "先にダッシュボードのCodexログインボタンでログインしてください。",
+    "zh-Hans": "请先通过控制台的 Codex 登录按钮登录。",
+    "zh-Hant": "請先透過控制台的 Codex 登入按鈕登入。"
+  },
+  "Windows 작업 권한을 자동으로 준비하고 있습니다. 관리자 확인 창이 나타나면 완료해 주세요.": {
+    "en": "Windows permissions are being prepared. Complete the administrator prompt.",
+    "ja": "Windowsの権限を準備中です。管理者の確認を完了してください。",
+    "zh-Hans": "正在准备 Windows 权限，请完成管理员确认。",
+    "zh-Hant": "正在準備 Windows 權限，請完成系統管理員確認。"
+  },
+  "현재 답변이 끝난 뒤 선택해 주세요.": {
+    "en": "Wait for the current response to finish.",
+    "ja": "現在の応答が終わってから選んでください。",
+    "zh-Hans": "请等待当前回复完成。",
+    "zh-Hant": "請等待目前回覆完成。"
+  },
+  "이 프로젝트에 업로드한 파일만 첨부할 수 있습니다.": {
+    "en": "Only files uploaded to this project can be attached.",
+    "ja": "このプロジェクトにアップロードしたファイルのみ添付できます。",
+    "zh-Hans": "只能附加上传到此项目的文件。",
+    "zh-Hant": "只能附加上傳到此專案的檔案。"
+  },
+  "프로젝트 실행 설정은 편집기에서 변경할 수 없습니다.": {
+    "en": "Project runtime settings cannot be changed in the editor.",
+    "ja": "実行環境の設定はエディターでは変更できません。",
+    "zh-Hans": "无法在编辑器中修改项目运行设置。",
+    "zh-Hant": "無法在編輯器中修改專案執行設定。"
+  },
+  "UTF-8 텍스트 2MB 이하만 저장할 수 있습니다.": {
+    "en": "Only UTF-8 text up to 2 MB can be saved.",
+    "ja": "保存できるのは2MB以下のUTF-8テキストです。",
+    "zh-Hans": "只能保存不超过 2MB 的 UTF-8 文本。",
+    "zh-Hant": "只能儲存不超過 2MB 的 UTF-8 文字。"
+  },
+  "파일이 변경되었습니다. 다시 열어 최신 내용을 확인하세요.": {
+    "en": "The file changed. Reopen it to see the latest contents.",
+    "ja": "ファイルが変更されました。開き直して最新の内容を確認してください。",
+    "zh-Hans": "文件已更改，请重新打开查看最新内容。",
+    "zh-Hant": "檔案已變更，請重新開啟查看最新內容。"
+  },
+  "올바른 파일 이름이 필요합니다.": {
+    "en": "A valid filename is required.",
+    "ja": "有効なファイル名が必要です。",
+    "zh-Hans": "需要有效的文件名。",
+    "zh-Hant": "需要有效的檔案名稱。"
+  },
+  "요청 크기가 올바르지 않습니다. 첨부는 16MB 이하로 선택하세요.": {
+    "en": "Invalid request size. Attachments must be 16 MB or smaller.",
+    "ja": "リクエストサイズが無効です。添付は16MB以下にしてください。",
+    "zh-Hans": "请求大小无效，附件不得超过 16MB。",
+    "zh-Hant": "請求大小無效，附件不得超過 16MB。"
+  },
+  "편집기는 2MB 이하의 텍스트 파일을 지원합니다.": {
+    "en": "The editor supports text files up to 2 MB.",
+    "ja": "エディターは2MB以下のテキストファイルに対応しています。",
+    "zh-Hans": "编辑器支持不超过 2MB 的文本文件。",
+    "zh-Hant": "編輯器支援不超過 2MB 的文字檔案。"
+  },
+  "이 파일은 UTF-8 텍스트 파일이 아닙니다.": {
+    "en": "This is not a UTF-8 text file.",
+    "ja": "このファイルはUTF-8テキストではありません。",
+    "zh-Hans": "此文件不是 UTF-8 文本文件。",
+    "zh-Hant": "此檔案不是 UTF-8 文字檔案。"
+  },
+  "프로젝트 안의 파일 경로가 필요합니다.": {
+    "en": "A path inside the project is required.",
+    "ja": "プロジェクト内のパスが必要です。",
+    "zh-Hans": "需要项目内的文件路径。",
+    "zh-Hant": "需要專案內的檔案路徑。"
+  },
+  "프로젝트 밖 경로는 사용할 수 없습니다.": {
+    "en": "Paths outside the project are not allowed.",
+    "ja": "プロジェクト外のパスは使用できません。",
+    "zh-Hans": "不允许使用项目外的路径。",
+    "zh-Hant": "不允許使用專案外的路徑。"
+  },
+  "파일 경로가 필요합니다.": {
+    "en": "A file path is required.",
+    "ja": "ファイルのパスが必要です。",
+    "zh-Hans": "需要文件路径。",
+    "zh-Hant": "需要檔案路徑。"
+  },
+  "등록된 프로젝트가 아닙니다.": {
+    "en": "This project is not registered.",
+    "ja": "未登録のプロジェクトです。",
+    "zh-Hans": "此项目尚未注册。",
+    "zh-Hant": "此專案尚未註冊。"
+  },
+  "프로젝트 경로가 변경되었습니다.": {
+    "en": "The project path has changed.",
+    "ja": "プロジェクトのパスが変更されました。",
+    "zh-Hans": "项目路径已更改。",
+    "zh-Hant": "專案路徑已變更。"
+  },
+  "프로젝트 마커가 등록 정보와 일치하지 않습니다.": {
+    "en": "The project marker does not match the registry.",
+    "ja": "プロジェクトマーカーが登録情報と一致しません。",
+    "zh-Hans": "项目标记与注册信息不匹配。",
+    "zh-Hant": "專案標記與註冊資訊不符。"
+  },
+  "Codex가 요청한 프로젝트 쓰기 범위를 적용하지 않아 대화를 시작하지 않았습니다.": {
+    "en": "Codex did not apply the required write scope. The conversation was not started.",
+    "ja": "Codexが必要な書き込み範囲を適用しなかったため、会話を開始しませんでした。",
+    "zh-Hans": "Codex 未应用所需的写入范围，未启动对话。",
+    "zh-Hant": "Codex 未套用所需的寫入範圍，未啟動對話。"
+  },
+  "프로젝트 밖 쓰기 권한이 감지되어 대화를 시작하지 않았습니다.": {
+    "en": "Write access outside the project was detected. The conversation was not started.",
+    "ja": "プロジェクト外への書き込み権限を検出したため、会話を開始しませんでした。",
+    "zh-Hans": "检测到项目外写入权限，未启动对话。",
+    "zh-Hant": "偵測到專案外寫入權限，未啟動對話。"
+  },
+  "메시지는 1~100,000자로 입력하세요.": {
+    "en": "Messages must contain 1–100,000 characters.",
+    "ja": "メッセージは1～100,000文字で入力してください。",
+    "zh-Hans": "消息须为 1–100,000 个字符。",
+    "zh-Hant": "訊息須為 1–100,000 個字元。"
+  },
+  "이미 답했거나 존재하지 않는 질문입니다.": {
+    "en": "This question was already answered or no longer exists.",
+    "ja": "回答済み、または存在しない質問です。",
+    "zh-Hans": "此问题已回答或不存在。",
+    "zh-Hant": "此問題已回答或不存在。"
+  },
+  "각 질문에 대한 응답이 필요합니다.": {
+    "en": "An answer is required for each question.",
+    "ja": "各質問への回答が必要です。",
+    "zh-Hans": "请回答每个问题。",
+    "zh-Hant": "請回答每個問題。"
+  },
+  "공용 실행 환경이 없습니다. start.bat을 먼저 실행하세요.": {
+    "en": "Runtime missing. Run the launcher or start.bat first.",
+    "ja": "実行環境がありません。ランチャーまたはstart.batを実行してください。",
+    "zh-Hans": "缺少运行环境，请先运行启动器或 start.bat。",
+    "zh-Hant": "缺少執行環境，請先執行啟動器或 start.bat。"
+  },
+  "공용 Python이 없습니다. start.bat으로 환경을 다시 준비하세요.": {
+    "en": "Python runtime missing. Run the launcher to repair it.",
+    "ja": "Python実行環境がありません。ランチャーで再準備してください。",
+    "zh-Hans": "缺少 Python 运行环境，请运行启动器修复。",
+    "zh-Hant": "缺少 Python 執行環境，請執行啟動器修復。"
+  },
+  "프로젝트 이름은 1~100자로 입력하세요.": {
+    "en": "Project names must contain 1–100 characters.",
+    "ja": "プロジェクト名は1～100文字で入力してください。",
+    "zh-Hans": "项目名称须为 1–100 个字符。",
+    "zh-Hant": "專案名稱須為 1–100 個字元。"
+  },
+  "공용 Python 실행 파일을 찾을 수 없습니다.": {
+    "en": "Python runtime executable not found.",
+    "ja": "Python実行ファイルが見つかりません。",
+    "zh-Hans": "找不到 Python 运行程序。",
+    "zh-Hant": "找不到 Python 執行程式。"
+  },
+  "Codex를 찾을 수 없습니다. Codex 앱, CLI 또는 VS Code 확장을 설치한 뒤 다시 실행하세요.": {
+    "en": "Codex was not found. Run the launcher to set up Codex CLI.",
+    "ja": "Codexが見つかりません。ランチャーでCodex CLIを準備してください。",
+    "zh-Hans": "找不到 Codex，请运行启动器安装 Codex CLI。",
+    "zh-Hant": "找不到 Codex，請執行啟動器安裝 Codex CLI。"
+  },
+  "Codex 연결이 종료되었습니다. 프로젝트를 다시 열어 연결하세요.": {
+    "en": "Codex disconnected. Reopen the project to reconnect.",
+    "ja": "Codexとの接続が終了しました。プロジェクトを開き直してください。",
+    "zh-Hans": "Codex 连接已结束，请重新打开项目连接。",
+    "zh-Hant": "Codex 連線已結束，請重新開啟專案連線。"
+  },
+  "결정 기록이 변경되었습니다. 갱신된 요약을 확인하세요.": {
+    "en": "Decisions changed. Review the updated summary.",
+    "ja": "決定記録が変わりました。更新されたまとめを確認してください。",
+    "zh-Hans": "决策记录已更改，请查看更新后的摘要。",
+    "zh-Hant": "決策紀錄已變更，請查看更新後的摘要。"
+  },
+  "이미 개발 시작을 승인한 프로젝트입니다.": {
+    "en": "Development has already been approved for this project.",
+    "ja": "このプロジェクトは制作開始を承認済みです。",
+    "zh-Hans": "此项目已获准开始制作。",
+    "zh-Hant": "此專案已獲准開始製作。"
+  },
+  "저장된 결정이 없습니다.": {
+    "en": "There are no saved decisions.",
+    "ja": "保存された決定がありません。",
+    "zh-Hans": "暂无已保存的决策。",
+    "zh-Hant": "暫無已儲存的決策。"
+  },
+  "Codex 로그인 후 사용량을 확인할 수 있습니다.": {
+    "en": "Sign in to Codex to view usage.",
+    "ja": "使用量を確認するにはCodexにログインしてください。",
+    "zh-Hans": "登录 Codex 后可查看使用量。",
+    "zh-Hant": "登入 Codex 後可查看使用量。"
+  }
+}
