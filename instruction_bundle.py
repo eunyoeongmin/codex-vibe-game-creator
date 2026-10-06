@@ -4,7 +4,7 @@ from pathlib import Path
 import tomllib
 
 SOURCE = Path(__file__).resolve().parent / 'instructions/dashboard.toml'
-SECTIONS = ('host', 'startup', 'question_tool', 'planning_more', 'production_start')
+SECTIONS = ('host', 'startup', 'question_tool', 'planning_more', 'production_start', 'asset_request')
 
 
 class InstructionBundle:

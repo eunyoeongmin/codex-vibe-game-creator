@@ -1558,5 +1558,623 @@
     "ja": "作業中…",
     "zh-Hans": "处理中…",
     "zh-Hant": "處理中…"
+  },
+  "응답 속도": {
+    "en": "Response speed",
+    "ja": "応答速度",
+    "zh-Hans": "响应速度",
+    "zh-Hant": "回應速度"
+  },
+  "기본 속도": {
+    "en": "Standard speed",
+    "ja": "標準速度",
+    "zh-Hans": "标准速度",
+    "zh-Hant": "標準速度"
+  },
+  "빠르게 · 사용량 증가": {
+    "en": "Fast · higher usage",
+    "ja": "高速 · 使用量増加",
+    "zh-Hans": "快速 · 用量增加",
+    "zh-Hant": "快速 · 用量增加"
+  },
+  "이 모델에서 사용할 수 있는 속도": {
+    "en": "Available speeds for this model",
+    "ja": "このモデルで利用できる速度",
+    "zh-Hans": "此模型可用的速度",
+    "zh-Hant": "此模型可用的速度"
+  },
+  "선택한 모델이 지원하는 속도를 선택하세요.": {
+    "en": "Select a speed supported by this model.",
+    "ja": "このモデルが対応する速度を選んでください。",
+    "zh-Hans": "请选择此模型支持的速度。",
+    "zh-Hant": "請選擇此模型支援的速度。"
+  },
+  "모델·추론 수준·속도 설정을 다음 작업부터 적용합니다.": {
+    "en": "Model, reasoning effort and speed settings apply to the next turn.",
+    "ja": "モデル・推論レベル・速度の設定は次の作業から適用されます。",
+    "zh-Hans": "模型、推理强度和速度设置将从下一轮开始生效。",
+    "zh-Hant": "模型、推理強度和速度設定將從下一輪開始生效。"
+  },
+  "프로젝트 안의 16MB 이하 이미지 파일만 표시할 수 있습니다.": {
+    "en": "Only project images up to 16 MB can be displayed.",
+    "ja": "プロジェクト内の16MB以下の画像のみ表示できます。",
+    "zh-Hans": "只能显示项目内不超过16MB的图片。",
+    "zh-Hant": "只能顯示專案內不超過16MB的圖片。"
+  },
+  "이미지를 불러오지 못했습니다: {0}": {
+    "en": "Could not load image: {0}",
+    "ja": "画像を読み込めませんでした: {0}",
+    "zh-Hans": "无法加载图片：{0}",
+    "zh-Hant": "無法載入圖片：{0}"
+  },
+  "직접 입력할 수도 있어요 · Shift+Enter로 줄바꿈": {
+    "en": "Or type your answer · Shift+Enter for a new line",
+    "ja": "直接入力もできます · Shift+Enterで改行",
+    "zh-Hans": "也可直接输入 · Shift+Enter换行",
+    "zh-Hant": "也可直接輸入 · Shift+Enter換行"
+  },
+  "주소 복사": {
+    "en": "Copy URL",
+    "ja": "URLをコピー",
+    "zh-Hans": "复制地址",
+    "zh-Hant": "複製網址"
+  },
+  "전체화면": {
+    "en": "Fullscreen",
+    "ja": "全画面",
+    "zh-Hans": "全屏",
+    "zh-Hant": "全螢幕"
+  },
+  "대시보드 실행 중 같은 PC의 다른 브라우저에서도 열 수 있습니다.": {
+    "en": "Open this URL in another browser on this PC while the dashboard is running.",
+    "ja": "ダッシュボードの起動中は、同じPCの別のブラウザーでも開けます。",
+    "zh-Hans": "仪表板运行期间，可在同一台电脑的其他浏览器中打开。",
+    "zh-Hant": "儀表板執行期間，可在同一台電腦的其他瀏覽器中開啟。"
+  },
+  "미리보기 주소를 복사했습니다.": {
+    "en": "Preview URL copied.",
+    "ja": "プレビューのURLをコピーしました。",
+    "zh-Hans": "已复制预览地址。",
+    "zh-Hant": "已複製預覽網址。"
+  },
+  "에셋": {
+    "en": "Assets",
+    "ja": "アセット",
+    "zh-Hans": "资源",
+    "zh-Hant": "素材"
+  },
+  "에셋 관리": {
+    "en": "Asset management",
+    "ja": "アセット管理",
+    "zh-Hans": "资源管理",
+    "zh-Hant": "素材管理"
+  },
+  "이미지": {
+    "en": "Images",
+    "ja": "画像",
+    "zh-Hans": "图片",
+    "zh-Hant": "圖片"
+  },
+  "사운드": {
+    "en": "Sound",
+    "ja": "サウンド",
+    "zh-Hans": "声音",
+    "zh-Hant": "聲音"
+  },
+  "임시": {
+    "en": "Temporary",
+    "ja": "仮",
+    "zh-Hans": "临时",
+    "zh-Hant": "暫用"
+  },
+  "사용 종료": {
+    "en": "Retired",
+    "ja": "使用終了",
+    "zh-Hans": "停用",
+    "zh-Hant": "停用"
+  },
+  "코드 아트": {
+    "en": "Code art",
+    "ja": "コードアート",
+    "zh-Hans": "代码美术",
+    "zh-Hant": "程式美術"
+  },
+  "이미지 생성": {
+    "en": "Image generation",
+    "ja": "画像生成",
+    "zh-Hans": "图像生成",
+    "zh-Hant": "影像生成"
+  },
+  "외부 에셋": {
+    "en": "External asset",
+    "ja": "外部アセット",
+    "zh-Hans": "外部资源",
+    "zh-Hant": "外部素材"
+  },
+  "별도 스킬 · 연결 미지원": {
+    "en": "Other skill · not connected",
+    "ja": "別のスキル · 未接続",
+    "zh-Hans": "其他技能 · 未连接",
+    "zh-Hant": "其他技能 · 未連接"
+  },
+  "적용 예정": {
+    "en": "Planned",
+    "ja": "適用予定",
+    "zh-Hans": "待应用",
+    "zh-Hant": "待套用"
+  },
+  "사용 중": {
+    "en": "In use",
+    "ja": "使用中",
+    "zh-Hans": "使用中",
+    "zh-Hant": "使用中"
+  },
+  "미사용": {
+    "en": "Unused",
+    "ja": "未使用",
+    "zh-Hans": "未使用",
+    "zh-Hant": "未使用"
+  },
+  "전체": {
+    "en": "All",
+    "ja": "すべて",
+    "zh-Hans": "全部",
+    "zh-Hant": "全部"
+  },
+  "표시할 에셋이 없습니다.": {
+    "en": "No assets to display.",
+    "ja": "表示するアセットはありません。",
+    "zh-Hans": "暂无可显示的资源。",
+    "zh-Hant": "暫無可顯示的素材。"
+  },
+  "열기 · 수정": {
+    "en": "Open / edit",
+    "ja": "開く・編集",
+    "zh-Hans": "打开 / 编辑",
+    "zh-Hant": "開啟 / 編輯"
+  },
+  "에셋: 임시 {0} · 제안 {1}": {
+    "en": "Assets: {0} temporary · {1} proposed",
+    "ja": "アセット: 仮 {0} · 提案 {1}",
+    "zh-Hans": "资源：临时 {0} · 提议 {1}",
+    "zh-Hant": "素材：暫用 {0} · 提議 {1}"
+  },
+  "{0} · 버전 {1}": {
+    "en": "{0} · version {1}",
+    "ja": "{0} · バージョン {1}",
+    "zh-Hans": "{0} · 版本 {1}",
+    "zh-Hant": "{0} · 版本 {1}"
+  },
+  "에셋 등록": {
+    "en": "Add asset",
+    "ja": "アセット登録",
+    "zh-Hans": "添加资源",
+    "zh-Hant": "新增素材"
+  },
+  "코드·파일 편집": {
+    "en": "Edit code / file",
+    "ja": "コード・ファイルを編集",
+    "zh-Hans": "编辑代码 / 文件",
+    "zh-Hant": "編輯程式 / 檔案"
+  },
+  "에셋 관리에서 확정으로 저장 선택": {
+    "en": "Selected Save as confirmed in asset management",
+    "ja": "アセット管理で確定として保存を選択",
+    "zh-Hans": "在资源管理中选择保存为已确认",
+    "zh-Hant": "在素材管理中選擇儲存為已確認"
+  },
+  "에셋 기록을 저장했습니다.": {
+    "en": "Asset record saved.",
+    "ja": "アセット記録を保存しました。",
+    "zh-Hans": "已保存资源记录。",
+    "zh-Hant": "已儲存素材紀錄。"
+  },
+  "수정 요청을 입력하세요.": {
+    "en": "Enter a change request.",
+    "ja": "修正内容を入力してください。",
+    "zh-Hans": "请输入修改要求。",
+    "zh-Hant": "請輸入修改要求。"
+  },
+  "에셋 분류": {
+    "en": "Asset type",
+    "ja": "アセット分類",
+    "zh-Hans": "资源类型",
+    "zh-Hant": "素材類型"
+  },
+  "에셋 상태": {
+    "en": "Asset status",
+    "ja": "アセット状態",
+    "zh-Hans": "资源状态",
+    "zh-Hant": "素材狀態"
+  },
+  "이름·용도·분류 검색": {
+    "en": "Search name, use or group",
+    "ja": "名前・用途・分類を検索",
+    "zh-Hans": "搜索名称、用途或分类",
+    "zh-Hant": "搜尋名稱、用途或分類"
+  },
+  "에셋 검색": {
+    "en": "Search assets",
+    "ja": "アセット検索",
+    "zh-Hans": "搜索资源",
+    "zh-Hant": "搜尋素材"
+  },
+  "에셋 이름": {
+    "en": "Asset name",
+    "ja": "アセット名",
+    "zh-Hans": "资源名称",
+    "zh-Hant": "素材名稱"
+  },
+  "분류": {
+    "en": "Type",
+    "ja": "分類",
+    "zh-Hans": "类型",
+    "zh-Hant": "類型"
+  },
+  "상태": {
+    "en": "Status",
+    "ja": "状態",
+    "zh-Hans": "状态",
+    "zh-Hant": "狀態"
+  },
+  "적용 상태": {
+    "en": "Usage state",
+    "ja": "適用状態",
+    "zh-Hans": "应用状态",
+    "zh-Hant": "套用狀態"
+  },
+  "하위 분류 · 자유 입력": {
+    "en": "Group · free text",
+    "ja": "下位分類 · 自由入力",
+    "zh-Hans": "子分类 · 自由填写",
+    "zh-Hant": "子分類 · 自由填寫"
+  },
+  "사용 상황·용도": {
+    "en": "Where and when it is used",
+    "ja": "使用場面・用途",
+    "zh-Hans": "使用场景与用途",
+    "zh-Hant": "使用情境與用途"
+  },
+  "제작 방식 · 복수 선택": {
+    "en": "Creation method · multiple allowed",
+    "ja": "制作方法 · 複数選択可",
+    "zh-Hans": "制作方式 · 可多选",
+    "zh-Hant": "製作方式 · 可複選"
+  },
+  "아트 기준·제작 조건": {
+    "en": "Art direction / production details",
+    "ja": "アート基準・制作条件",
+    "zh-Hans": "美术标准与制作条件",
+    "zh-Hant": "美術標準與製作條件"
+  },
+  "선택 이유 · 혼합한 경우 혼합 이유": {
+    "en": "Choice rationale · explain mixed methods",
+    "ja": "選択理由 · 混在する場合はその理由",
+    "zh-Hans": "选择理由 · 混合时请说明理由",
+    "zh-Hant": "選擇理由 · 混合時請說明理由"
+  },
+  "임시 에셋 교체 계획": {
+    "en": "Temporary asset replacement plan",
+    "ja": "仮アセットの置き換え計画",
+    "zh-Hans": "临时资源替换计划",
+    "zh-Hant": "暫用素材替換計畫"
+  },
+  "파일·구현 코드 경로 · 한 줄에 하나": {
+    "en": "File / code paths · one per line",
+    "ja": "ファイル・実装コードのパス · 1行に1つ",
+    "zh-Hans": "文件或代码路径 · 每行一个",
+    "zh-Hant": "檔案或程式路徑 · 每行一個"
+  },
+  "파일 추가": {
+    "en": "Add file",
+    "ja": "ファイル追加",
+    "zh-Hans": "添加文件",
+    "zh-Hant": "新增檔案"
+  },
+  "교체할 파일 경로는 목록에서 바꾸세요. 게임 코드 적용은 AI에 요청할 수 있습니다.": {
+    "en": "Change the paths in the list to replace files. Ask AI to apply them to the game code.",
+    "ja": "置き換えるファイルのパスを一覧で変更してください。ゲームコードへの適用はAIに依頼できます。",
+    "zh-Hans": "在列表中修改要替换的文件路径。可让AI将其应用到游戏代码。",
+    "zh-Hant": "在清單中修改要替換的檔案路徑。可請AI將其套用到遊戲程式。"
+  },
+  "출처·연결 기록": {
+    "en": "Sources / linked records",
+    "ja": "出典・関連記録",
+    "zh-Hans": "来源与关联记录",
+    "zh-Hant": "來源與關聯紀錄"
+  },
+  "출처·도구·생성 조건·코드 위치": {
+    "en": "Source, tool, generation details or code location",
+    "ja": "出典・ツール・生成条件・コード位置",
+    "zh-Hans": "来源、工具、生成条件或代码位置",
+    "zh-Hant": "來源、工具、生成條件或程式位置"
+  },
+  "관련 결정 ID · 한 줄에 하나": {
+    "en": "Decision IDs · one per line",
+    "ja": "関連決定ID · 1行に1つ",
+    "zh-Hans": "相关决定ID · 每行一个",
+    "zh-Hant": "相關決定ID · 每行一個"
+  },
+  "레퍼런스 ID · 한 줄에 하나": {
+    "en": "Reference IDs · one per line",
+    "ja": "参考資料ID · 1行に1つ",
+    "zh-Hans": "参考资料ID · 每行一个",
+    "zh-Hant": "參考資料ID · 每行一個"
+  },
+  "이번 등록·수정 이유": {
+    "en": "Reason for this addition / change",
+    "ja": "今回の登録・修正理由",
+    "zh-Hans": "此次添加或修改的理由",
+    "zh-Hant": "此次新增或修改的理由"
+  },
+  "확정으로 저장하면 이 버전의 에셋을 선택한 것으로 기록합니다.": {
+    "en": "Saving as confirmed records your selection of this asset version.",
+    "ja": "確定として保存すると、このバージョンのアセットを選択したと記録されます。",
+    "zh-Hans": "保存为已确认将记录您选择了此版本的资源。",
+    "zh-Hant": "儲存為已確認將記錄您選擇了此版本的素材。"
+  },
+  "AI에 수정 요청": {
+    "en": "Request an AI edit",
+    "ja": "AIに修正を依頼",
+    "zh-Hans": "请求AI修改",
+    "zh-Hant": "請求AI修改"
+  },
+  "저장된 에셋을 대상으로 요청합니다. 위에서 바꾼 내용은 먼저 저장하세요.": {
+    "en": "Requests use the saved asset. Save any edits above first.",
+    "ja": "保存済みアセットを対象に依頼します。上の変更は先に保存してください。",
+    "zh-Hans": "请求将使用已保存的资源。请先保存上面的修改。",
+    "zh-Hant": "請求將使用已儲存的素材。請先儲存上面的修改。"
+  },
+  "에셋 수정 요청": {
+    "en": "Asset change request",
+    "ja": "アセットの修正依頼",
+    "zh-Hans": "资源修改请求",
+    "zh-Hant": "素材修改請求"
+  },
+  "수정 요청 보내기": {
+    "en": "Send change request",
+    "ja": "修正依頼を送信",
+    "zh-Hans": "发送修改请求",
+    "zh-Hant": "傳送修改請求"
+  },
+  "변경 이력": {
+    "en": "Change history",
+    "ja": "変更履歴",
+    "zh-Hans": "修改历史",
+    "zh-Hant": "修改歷史"
+  },
+  "에셋을 찾을 수 없습니다.": {
+    "en": "Asset not found.",
+    "ja": "アセットが見つかりません。",
+    "zh-Hans": "找不到资源。",
+    "zh-Hant": "找不到素材。"
+  },
+  "에셋이 변경되었습니다. 새로고침 후 다시 저장하세요.": {
+    "en": "This asset has changed. Refresh before saving again.",
+    "ja": "アセットが変更されています。更新してから保存してください。",
+    "zh-Hans": "资源已更改。请刷新后再保存。",
+    "zh-Hant": "素材已變更。請重新整理後再儲存。"
+  },
+  "제작 방식을 하나 이상 선택하세요.": {
+    "en": "Select at least one creation method.",
+    "ja": "制作方法を1つ以上選んでください。",
+    "zh-Hans": "请至少选择一种制作方式。",
+    "zh-Hant": "請至少選擇一種製作方式。"
+  },
+  "등록할 에셋 파일이 프로젝트 안에 없습니다.": {
+    "en": "The asset file does not exist in this project.",
+    "ja": "登録するアセットファイルがプロジェクト内にありません。",
+    "zh-Hans": "项目内不存在要登记的资源文件。",
+    "zh-Hant": "專案內不存在要登記的素材檔案。"
+  },
+  "사용 중인 에셋에는 파일 또는 구현 코드 경로가 필요합니다.": {
+    "en": "An asset in use needs a file or implementation path.",
+    "ja": "使用中のアセットにはファイルまたは実装コードのパスが必要です。",
+    "zh-Hans": "使用中的资源需要文件或实现代码路径。",
+    "zh-Hant": "使用中的素材需要檔案或實作程式路徑。"
+  },
+  "같은 프로젝트의 결정·레퍼런스만 연결할 수 있습니다.": {
+    "en": "Only decisions and references from this project can be linked.",
+    "ja": "同じプロジェクトの決定・参考資料のみ関連付けられます。",
+    "zh-Hans": "只能关联同一项目的决定和参考资料。",
+    "zh-Hant": "只能關聯同一專案的決定和參考資料。"
+  },
+  "미리보기는 16MB 이하 이미지·사운드 파일을 지원합니다.": {
+    "en": "Preview supports image and sound files up to 16 MB.",
+    "ja": "プレビューは16MB以下の画像・音声に対応しています。",
+    "zh-Hans": "预览支持不超过16MB的图片和声音文件。",
+    "zh-Hant": "預覽支援不超過16MB的圖片與聲音檔案。"
+  },
+  "이 에셋에 등록된 파일만 열 수 있습니다.": {
+    "en": "Only files registered to this asset can be opened.",
+    "ja": "このアセットに登録されたファイルのみ開けます。",
+    "zh-Hans": "只能打开此资源登记的文件。",
+    "zh-Hant": "只能開啟此素材登記的檔案。"
+  },
+  "수정 요청을 1~10,000자로 입력하세요.": {
+    "en": "Enter a change request of 1–10,000 characters.",
+    "ja": "修正依頼を1～10,000文字で入力してください。",
+    "zh-Hans": "请输入1至10,000个字符的修改请求。",
+    "zh-Hant": "請輸入1至10,000個字元的修改請求。"
+  },
+  "에셋 파일은 프로젝트 내부 상대 경로로 지정하세요.": {
+    "en": "Use a project-relative path for asset files.",
+    "ja": "アセットファイルはプロジェクト内の相対パスで指定してください。",
+    "zh-Hans": "请使用项目内部相对路径指定资源文件。",
+    "zh-Hant": "請使用專案內部相對路徑指定素材檔案。"
+  },
+  "확정된 아트 기준": {
+    "en": "Confirmed art direction",
+    "ja": "確定済みアート基準",
+    "zh-Hans": "已确认的美术标准",
+    "zh-Hant": "已確認的美術標準"
+  },
+  "사용 종료 에셋은 적용 상태를 미사용으로 지정하세요.": {
+    "en": "Set retired assets to Unused.",
+    "ja": "使用終了アセットの適用状態は未使用にしてください。",
+    "zh-Hans": "请将停用资源的应用状态设为未使用。",
+    "zh-Hant": "請將停用素材的套用狀態設為未使用。"
+  },
+  "조사·해석·적용 보기": {
+    "en": "Research, interpretation and use",
+    "ja": "調査・解釈・適用を見る",
+    "zh-Hans": "查看调查、解读与应用",
+    "zh-Hant": "查看調查、解讀與應用"
+  },
+  "불러오는 중…": {
+    "en": "Loading…",
+    "ja": "読み込み中…",
+    "zh-Hans": "正在加载…",
+    "zh-Hant": "正在載入…"
+  },
+  "이미지 보기": {
+    "en": "View image",
+    "ja": "画像を見る",
+    "zh-Hans": "查看图片",
+    "zh-Hant": "查看圖片"
+  },
+  "파일 보기": {
+    "en": "View file",
+    "ja": "ファイルを見る",
+    "zh-Hans": "查看文件",
+    "zh-Hant": "查看檔案"
+  },
+  "사용자 원문": {
+    "en": "Original user statement",
+    "ja": "ユーザーの原文",
+    "zh-Hans": "用户原文",
+    "zh-Hant": "使用者原文"
+  },
+  "참고 요소": {
+    "en": "Selected aspects",
+    "ja": "参考する要素",
+    "zh-Hans": "参考要素",
+    "zh-Hant": "參考要素"
+  },
+  "조사 근거": {
+    "en": "Research evidence",
+    "ja": "調査の根拠",
+    "zh-Hans": "调查依据",
+    "zh-Hant": "調查依據"
+  },
+  "참고 해석": {
+    "en": "Reference interpretation",
+    "ja": "参考内容の解釈",
+    "zh-Hans": "参考解读",
+    "zh-Hant": "參考解讀"
+  },
+  "적용 연결": {
+    "en": "Application links",
+    "ja": "適用先の記録",
+    "zh-Hans": "应用关联",
+    "zh-Hant": "應用關聯"
+  },
+  "적용 기록": {
+    "en": "Recorded application",
+    "ja": "適用記録",
+    "zh-Hans": "应用记录",
+    "zh-Hant": "應用紀錄"
+  },
+  "채택하지 않음": {
+    "en": "Not adopted",
+    "ja": "不採用",
+    "zh-Hans": "未采用",
+    "zh-Hant": "未採用"
+  },
+  "대체한 기록": {
+    "en": "Superseded by",
+    "ja": "置き換えた記録",
+    "zh-Hans": "替代记录",
+    "zh-Hant": "取代紀錄"
+  },
+  "근거가 변경됨 · 적용 재검토 필요": {
+    "en": "Basis changed · review application",
+    "ja": "根拠が変更済み・適用の再検討が必要",
+    "zh-Hans": "依据已变更 · 需重新审视应用",
+    "zh-Hant": "依據已變更 · 需重新檢視應用"
+  },
+  "근거 위치": {
+    "en": "Evidence location",
+    "ja": "根拠の位置",
+    "zh-Hans": "依据位置",
+    "zh-Hant": "依據位置"
+  },
+  "관찰 내용": {
+    "en": "Observed facts",
+    "ja": "観察内容",
+    "zh-Hans": "观察内容",
+    "zh-Hant": "觀察內容"
+  },
+  "확인하지 못한 부분": {
+    "en": "Not established",
+    "ja": "未確認の部分",
+    "zh-Hans": "未确认的部分",
+    "zh-Hant": "未確認的部分"
+  },
+  "AI 해석": {
+    "en": "AI interpretation",
+    "ja": "AIの解釈",
+    "zh-Hans": "AI 解读",
+    "zh-Hant": "AI 解讀"
+  },
+  "적용 설계": {
+    "en": "Application design",
+    "ja": "適用の設計",
+    "zh-Hans": "应用设计",
+    "zh-Hant": "應用設計"
+  },
+  "원본·설계와의 차이": {
+    "en": "Differences from source or plan",
+    "ja": "原典・設計との差分",
+    "zh-Hans": "与原作或设计的差异",
+    "zh-Hant": "與原作或設計的差異"
+  },
+  "연결된 결정": {
+    "en": "Linked decisions",
+    "ja": "関連する決定",
+    "zh-Hans": "关联决策",
+    "zh-Hant": "關聯決策"
+  },
+  "연결된 에셋": {
+    "en": "Linked assets",
+    "ja": "関連するアセット",
+    "zh-Hans": "关联素材",
+    "zh-Hant": "關聯素材"
+  },
+  "선택·변경 이유": {
+    "en": "Selection or change reason",
+    "ja": "選択・変更の理由",
+    "zh-Hans": "选择或变更原因",
+    "zh-Hant": "選擇或變更原因"
+  },
+  "AI 답변 원문": {
+    "en": "Original AI response",
+    "ja": "AI回答の原文",
+    "zh-Hans": "AI 回答原文",
+    "zh-Hant": "AI 回答原文"
+  },
+  "아직 기록되지 않았습니다.": {
+    "en": "Not recorded yet.",
+    "ja": "まだ記録されていません。",
+    "zh-Hans": "尚未记录。",
+    "zh-Hant": "尚未記錄。"
+  },
+  "이전 기록과 변경 이력": {
+    "en": "Previous records and changes",
+    "ja": "以前の記録と変更履歴",
+    "zh-Hans": "历史记录与变更",
+    "zh-Hant": "歷史紀錄與變更"
+  },
+  "연결된 결정·에셋": {
+    "en": "Linked decisions and assets",
+    "ja": "関連する決定・アセット",
+    "zh-Hans": "关联决策与素材",
+    "zh-Hant": "關聯決策與素材"
+  },
+  "에셋 기록 버전": {
+    "en": "Recorded asset versions",
+    "ja": "記録時のアセット版",
+    "zh-Hans": "记录时的素材版本",
+    "zh-Hant": "記錄時的素材版本"
   }
 }

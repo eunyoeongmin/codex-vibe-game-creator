@@ -27,18 +27,91 @@ def installed_runtime():
 
 
 def ensure_production_support(project):
-    """Upgrade harness-owned milestone support when an older project starts production."""
+    """Refresh runtime support and add missing role guides without overwriting custom guides."""
     root, _ = decisions.find_project(project)
     script = decisions.project_path(root, '.harness/decisions.py')
     source_script = (HARNESS_ROOT / 'decisions.py').read_text(encoding='utf-8')
     if not script.exists() or script.read_text(encoding='utf-8') != source_script:
         decisions.atomic_text(script, source_script)
-    guide = decisions.project_path(root, 'guide/development.md')
-    existing = guide.read_text(encoding='utf-8')
-    if '## 제작 진행 규칙' not in existing:
-        source = (TEMPLATE_ROOT / 'guide/development.md').read_text(encoding='utf-8')
-        addition = source[source.index('## 제작 진행 규칙'):]
-        decisions.atomic_text(guide, existing + '\n' + addition)
+    decisions.atomic_text(decisions.project_path(root, '.harness/asset_store.py'),
+                          (HARNESS_ROOT / 'asset_store.py').read_text(encoding='utf-8'))
+    decisions.atomic_text(decisions.project_path(root, '.harness/reference_trace.py'),
+                          (HARNESS_ROOT / 'reference_trace.py').read_text(encoding='utf-8'))
+    for relative in ('guide/assets.md', 'guide/production-workflow.md', 'agents/developer.md',
+                     'agents/art.md', 'agents/verification.md', 'agents/game-designer.md',
+                     'agents/reference.md', 'guide/reference-tracing.md'):
+        target = decisions.project_path(root, relative)
+        if not target.exists():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            decisions.atomic_text(target, (TEMPLATE_ROOT / relative).read_text(encoding='utf-8'))
+    entry = decisions.project_path(root, 'AGENTS.md')
+    original = entry.read_text(encoding='utf-8')
+    text = original.replace('guide/development.md', 'guide/production-workflow.md')
+    if '## 역할별 적용 범위' not in text:
+        source = (TEMPLATE_ROOT / 'AGENTS.md').read_text(encoding='utf-8')
+        role_scope = source[source.index('## 역할별 적용 범위'):source.index('## 실행 환경')]
+        # Put role boundaries before existing rules, preserving project-specific text.
+        first_heading = text.find('\n## ')
+        position = first_heading + 1 if first_heading >= 0 else len(text)
+        text = text[:position] + '\n' + role_scope + text[position:]
+    if 'agents/game-designer.md' not in text:
+        source = (TEMPLATE_ROOT / 'AGENTS.md').read_text(encoding='utf-8')
+        row = next(line for line in source.splitlines() if '| agents/game-designer.md |' in line)
+        table = '| 배정할 작업 | 담당 | 담당에게 전달할 지침 |\n|---|---|---|'
+        if table in text:
+            text = text.replace(table, table + '\n' + row, 1)
+        else:
+            text += '\n게임 규칙·콘텐츠·수치와 시스템 연결 설계는 게임 디자이너에게 맡기고 agents/game-designer.md 경로를 전달한다. 해당 담당이 지침을 직접 읽는다.\n'
+    if 'agents/reference.md' not in text:
+        source = (TEMPLATE_ROOT / 'AGENTS.md').read_text(encoding='utf-8')
+        row = next(line for line in source.splitlines() if '| agents/reference.md |' in line)
+        table = '| 배정할 작업 | 담당 | 담당에게 전달할 지침 |\n|---|---|---|'
+        text = text.replace(table, table + '\n' + row, 1) if table in text else text + '\n레퍼런스 조사·해석 근거 정리는 레퍼런스 담당에게 맡기고 agents/reference.md 경로를 전달한다. 해당 담당이 지침을 직접 읽는다.\n'
+    reference_guide = decisions.project_path(root, 'guide/references.md')
+    if reference_guide.is_file():
+        previous = reference_guide.read_text(encoding='utf-8')
+        if 'reference-tracing.md' not in previous:
+            decisions.atomic_text(reference_guide, previous + '\n조사·해석·적용의 추적 기록은 [레퍼런스 추적 기록](reference-tracing.md)을 따른다.\n')
+    for row in (
+        '| 개발 담당으로 구현이나 수정을 시작할 때 | agents/developer.md |',
+        '| 아트 담당으로 에셋을 제작·관리할 때 | agents/art.md |',
+        '| 검증 담당으로 확인 작업을 수행할 때 | agents/verification.md |',
+    ):
+        text = text.replace(row + '\n', '')
+    for label, relative in (('개발 담당의 구현', 'agents/developer.md'),
+                            ('아트 담당의 제작·관리', 'agents/art.md'),
+                            ('검증 담당의 확인', 'agents/verification.md')):
+        text = text.replace(f'{label} 전에 [{label} 지침]({relative})을 읽는다.\n', '')
+    old_routing = '아래 상황이 되면 작업을 시작하기 전에 해당 문서를 읽는다. 읽지 않고 그 작업의 규칙을 추측해서 적용하지 않는다.'
+    text = text.replace(old_routing,
+        '아래 표는 해당 작업을 직접 수행하는 담당에게만 적용한다. 배정·결과 수신만 하는 오케스트레이터에게 하위 담당의 실무 문서 읽기를 요구하지 않는다. 읽지 않고 그 작업의 규칙을 추측해서 적용하지 않는다.')
+    asset_routing = '에셋을 직접 제작·적용·교체하거나 관리하는 담당은 [에셋 관리 지침](guide/assets.md)을 읽는다.'
+    text = text.replace('에셋을 제작·적용·교체하거나 관리할 때는 먼저 [에셋 관리 지침](guide/assets.md)을 읽는다.', asset_routing)
+    if 'guide/assets.md' not in text:
+        text += '\n' + asset_routing + '\n'
+    if 'guide/production-workflow.md' not in text:
+        text += '\n오케스트레이터는 작업 배분·진행·마감 전에 [제작 진행 절차](guide/production-workflow.md)를 읽는다.\n'
+    if text != original:
+        decisions.atomic_text(entry, text)
+    product = decisions.project_path(root, 'guide/product-design.md')
+    if product.is_file():
+        existing = product.read_text(encoding='utf-8')
+        updated = existing.replace('development.md', 'production-workflow.md')
+        if updated != existing:
+            decisions.atomic_text(product, updated)
+    work = decisions.project_path(root, 'guide/work-decisions.md')
+    if work.is_file():
+        existing = work.read_text(encoding='utf-8')
+        if '### AI가 선택한 내용과 승인 구분' not in existing:
+            source = (TEMPLATE_ROOT / 'guide/work-decisions.md').read_text(encoding='utf-8')
+            selection = source[source.index('### AI가 선택한 내용과 승인 구분'):source.index('### 테이블 구조')]
+            condition = next(line for line in source.splitlines() if line.startswith('- 승인된 기능을 구현하는 데 필요한 미결정'))
+            updated = existing.replace('### 저장 조건 (하나라도 해당하면 저장)',
+                                       '### 저장 조건 (하나라도 해당하면 저장)\n' + condition)
+            updated = updated.replace('저장하지 않는 것: 변수명, 포맷팅, 단순 버그 수정, 사소한 구현 선택',
+                '저장하지 않는 것: 동작·결과에 영향을 주는 새 선택이 없는 변수명 변경, 포맷팅, 단순 버그 수정.')
+            updated += '\n' + selection
+            decisions.atomic_text(work, updated)
 
 
 def create_project(projects_root=None, *, name='새 게임', runtime=None):
@@ -61,6 +134,8 @@ def create_project(projects_root=None, *, name='새 게임', runtime=None):
         support = project / '.harness'
         support.mkdir()
         shutil.copyfile(HARNESS_ROOT / 'decisions.py', support / 'decisions.py')
+        shutil.copyfile(HARNESS_ROOT / 'asset_store.py', support / 'asset_store.py')
+        shutil.copyfile(HARNESS_ROOT / 'reference_trace.py', support / 'reference_trace.py')
         shutil.copyfile(HARNESS_ROOT / 'requirements-runtime.txt', support / 'requirements-runtime.txt')
         (support / 'runtime.json').write_text(json.dumps(runtime, ensure_ascii=False, indent=2), encoding='utf-8')
         replacements = {

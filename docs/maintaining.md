@@ -23,7 +23,7 @@ Interface translations live in `web/locales.json`; the Korean keys are source st
    python -B build_release.py
    ```
 
-   This uses the Windows .NET Framework C# compiler, creates `dist/*-setup.exe`, a ZIP and `SHA256SUMS.txt`. `--zip-only` skips the compiler. The builder uses an explicit file allowlist, excludes personal state, and copies the end-user template as the package's root AGENTS.md.
+   This uses the Windows .NET Framework C# compiler, creates `dist/*-setup.exe`, a ZIP and `SHA256SUMS.txt`. `--zip-only` skips the compiler. The builder uses an explicit file allowlist, excludes personal state, and copies the end-user template as the package's root AGENTS.md. Both runtime files and resources are individually listed in `build_release.py` (`FILES` and `RESOURCE_FILES`); new release resources must be added there explicitly. Tests, fixtures, and scratch files stay in the source workspace and are not included simply because they are inside a resource folder. The installer embeds the same ZIP payload.
 4. Test the setup on a clean Windows x64 environment, including first sign-in and sandbox setup. The `--extract-only <empty-folder>` executable option checks package extraction without installing dependencies or creating a session.
 5. Publish a tag matching VERSION and attach those three assets to a GitHub Release. The workflow builds a **draft** release on `v*` tags; review it before publishing.
 

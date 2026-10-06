@@ -56,7 +56,7 @@
 
 当前发行的可执行文件尚未进行代码签名。请从本仓库 Releases 下载，可使用 `SHA256SUMS.txt` 核对文件。
 
-版本 **0.1.1** · [更新日志](../CHANGELOG.md) · [维护与发布](maintaining.md)
+版本 **0.1.2** · [更新日志](../CHANGELOG.md) · [维护与发布](maintaining.md)
 
 ## 许可证与第三方组件
 

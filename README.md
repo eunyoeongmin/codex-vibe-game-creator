@@ -62,7 +62,7 @@ The dashboard listens on **127.0.0.1** with a per-run access token. Codex uses a
 
 ## Development and releases
 
-See [Maintaining and releasing](docs/maintaining.md). Version: **0.1.1**. Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
+See [Maintaining and releasing](docs/maintaining.md). Version: **0.1.2**. Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

@@ -23,6 +23,7 @@ import new_project
 from dashboard_planning import Planning
 from runtime_setup import APP_HOME
 from localization import valid_language
+from asset_store import AssetStore
 
 WEB = Path(__file__).resolve().parent / 'web'
 MAX_BODY = 24 * 1024 * 1024
@@ -91,7 +92,19 @@ class App:
             raise ValueError('선택한 모델이 지원하는 추론 수준을 선택하세요.')
         return selected['model'], effort
 
-    def connect(self, project_id, model=None, effort=None):
+    def service_tier(self, model, tier=None):
+        tier = tier or 'default'
+        models = self.auth().call('model/list', {'limit': 100}).get('data', [])
+        selected = next((m for m in models if m['model'] == model), {})
+        tiers = selected.get('serviceTiers') or []
+        allowed = {'default', *(t['id'] for t in tiers)}
+        if not tiers:
+            allowed.update('priority' if t == 'fast' else t for t in selected.get('additionalSpeedTiers') or [])
+        if tier not in allowed:
+            raise ValueError('선택한 모델이 지원하는 속도를 선택하세요.')
+        return tier
+
+    def connect(self, project_id, model=None, effort=None, service_tier=None):
         with self.lock:
             project = self.state.project(project_id)
             session = self.sessions.get(project_id)
@@ -103,12 +116,13 @@ class App:
                 raise ValueError('Windows 작업 권한을 자동으로 준비하고 있습니다. 관리자 확인 창이 나타나면 완료해 주세요.')
             model, effort = self.model_settings(model or project.get('model'),
                                                 effort or project.get('info', {}).get('requested_effort'))
+            service_tier = self.service_tier(model, service_tier or project.get('info', {}).get('requested_service_tier'))
             new_project.ensure_production_support(Path(project['path']))
             session = ProjectSession(self.state, project_id, self.codex_home)
             session.planning = self.planning
             self.sessions[project_id] = session
             try:
-                return session.connect(model, effort)
+                return session.connect(model, effort, service_tier)
             except Exception:
                 session.close()
                 self.sessions.pop(project_id, None)
@@ -194,7 +208,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-store')
         self.send_header('X-Content-Type-Options', 'nosniff')
         self.send_header('Referrer-Policy', 'no-referrer')
-        self.send_header('Content-Security-Policy', "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob: data:; frame-src http://127.0.0.1:*; frame-ancestors 'none'; base-uri 'none'")
+        self.send_header('Content-Security-Policy', "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob: data: https: http:; media-src 'self' blob: data:; frame-src http://127.0.0.1:*; frame-ancestors 'none'; base-uri 'none'")
         self.end_headers()
         self.wfile.write(data)
 
@@ -216,12 +230,13 @@ class Handler(BaseHTTPRequestHandler):
         try:
             parsed = urlsplit(self.path)
             route = parsed.path
-            if method == 'GET' and route in ('/', '/app.js', '/style.css', '/i18n.js', '/locales.json'):
+            if method == 'GET' and route in ('/', '/app.js', '/assets.js', '/references.js', '/style.css', '/i18n.js', '/locales.json'):
                 if self.headers.get('Host') != f'127.0.0.1:{self.server.server_port}':
                     return self.respond({'error': '허용되지 않은 호스트입니다.'}, 403)
                 filename = 'index.html' if route == '/' else route[1:]
                 return self.respond((WEB / filename).read_bytes(), content_type={
-                    'index.html': 'text/html; charset=utf-8', 'app.js': 'text/javascript; charset=utf-8',
+                    'index.html': 'text/html; charset=utf-8', 'app.js': 'text/javascript; charset=utf-8', 'assets.js': 'text/javascript; charset=utf-8',
+                    'references.js': 'text/javascript; charset=utf-8',
                     'style.css': 'text/css; charset=utf-8', 'i18n.js': 'text/javascript; charset=utf-8',
                     'locales.json': 'application/json; charset=utf-8'}[filename])
             if not self.authorized():
@@ -280,16 +295,50 @@ class Handler(BaseHTTPRequestHandler):
         project_id, action = parts[2:]
         project = app.state.project(project_id)
         root = Path(project['path'])
+        if action == 'assets' and method == 'GET':
+            store = AssetStore(root)
+            return {'assets': store.list(kind=query.get('kind'), status=query.get('status'), query=query.get('q')),
+                    'art_decisions': store.art_decisions()}
+        if action == 'asset-save' and method == 'POST':
+            return AssetStore(root).save(body.get('values'), asset_id=body.get('id'),
+                expected_revision=body.get('revision'), actor='user', change_note=body.get('change_note'))
+        if action == 'asset-history' and method == 'GET':
+            return {'history': AssetStore(root).history(query.get('id'))}
+        if action == 'asset-request' and method == 'POST':
+            asset = AssetStore(root).get(body.get('id'))
+            if asset['revision'] != body.get('revision'):
+                raise ValueError('에셋이 변경되었습니다. 새로고침 후 다시 저장하세요.')
+            request = body.get('text')
+            if not isinstance(request, str) or not request.strip() or len(request) > 10000:
+                raise ValueError('수정 요청을 1~10,000자로 입력하세요.')
+            session = app.session(project_id)
+            text = session.instructions.render('asset_request', asset=json.dumps(asset, ensure_ascii=False), request=request)
+            session.send_message(text, instruction_section='asset_request', display_text=f'{asset["name"]}\n{request}')
+            return {'accepted': True, 'working': bool(session.turn_id), 'activity': session.activity_status()}
+        if action == 'asset-media' and method == 'GET':
+            store = AssetStore(root)
+            asset = store.get(query.get('id'))
+            if query.get('path') not in asset['files']:
+                raise ValueError('이 에셋에 등록된 파일만 열 수 있습니다.')
+            path = store.file(query['path'])
+            types = {'.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif',
+                     '.webp': 'image/webp', '.avif': 'image/avif', '.svg': 'image/svg+xml', '.bmp': 'image/bmp',
+                     '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.m4a': 'audio/mp4', '.flac': 'audio/flac'}
+            if path.suffix.lower() not in types or not path.is_file() or path.stat().st_size > 16 * 1024 * 1024:
+                raise ValueError('미리보기는 16MB 이하 이미지·사운드 파일을 지원합니다.')
+            return {'mime': types[path.suffix.lower()], 'data': base64.b64encode(path.read_bytes()).decode('ascii')}
         if method == 'GET' and action == 'history':
             before = int(query['before']) if 'before' in query else None
             return app.state.history(project_id, before=before)
         if method == 'GET' and action == 'events':
             session = app.sessions.get(project_id)
+            assets = AssetStore(root).list()
             return {'events': app.state.events(project_id, int(query.get('after', 0))),
                     'questions': app.state.questions(project_id), 'project': project,
                     'connected': bool(session and not session.closed),
                     'working': bool(session and session.turn_id),
                     'activity': session.activity_status() if session else None,
+                    'asset_counts': {status: sum(a['status'] == status for a in assets) for status in ('temporary', 'proposed')},
                     'progress': app.planning.progress(project_id)}
         if method == 'GET' and action == 'progress':
             return app.planning.progress(project_id)
@@ -316,11 +365,12 @@ class Handler(BaseHTTPRequestHandler):
                 app.planning.delivered(project_id)
                 return app.planning.progress(project_id)
         if method == 'POST' and action == 'connect':
-            return {'info': app.connect(project_id, body.get('model'), body.get('effort'))}
+            return {'info': app.connect(project_id, body.get('model'), body.get('effort'), body.get('service_tier'))}
         if method == 'POST' and action == 'model':
             model, effort = app.model_settings(body.get('model'), body.get('effort'))
-            app.session(project_id).change_model(model, effort)
-            return {'model': model, 'effort': effort}
+            tier = app.service_tier(model, body.get('service_tier'))
+            app.session(project_id).change_model(model, effort, tier)
+            return {'model': model, 'effort': effort, 'service_tier': tier}
         if method == 'POST' and action == 'message':
             attachments = [safe_file(root, p) for p in body.get('attachments', [])]
             if any(p.parent != root / 'uploads' or not p.is_file() for p in attachments):
@@ -375,13 +425,16 @@ class Handler(BaseHTTPRequestHandler):
             path.parent.mkdir(parents=True, exist_ok=True)
             safe_file(root, path.relative_to(root).as_posix()).write_text(content, encoding='utf-8')
             return {'digest': hashlib.sha256(path.read_bytes()).hexdigest()}
-        if method == 'GET' and action == 'attachment':
-            path = safe_file(root, query.get('path'))
+        if method == 'GET' and action in ('attachment', 'image'):
+            requested = query.get('path', '')
+            if action == 'image' and Path(requested).is_absolute():
+                requested = Path(requested).resolve().relative_to(root).as_posix()
+            path = safe_file(root, requested)
             types = {'.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
                      '.gif': 'image/gif', '.webp': 'image/webp', '.bmp': 'image/bmp', '.avif': 'image/avif'}
-            if (path.parent != root / 'uploads' or path.suffix.lower() not in types
+            if ((action == 'attachment' and path.parent != root / 'uploads') or path.suffix.lower() not in types
                     or not path.is_file() or path.stat().st_size > 16 * 1024 * 1024):
-                raise ValueError('이 프로젝트에 업로드한 이미지만 미리 볼 수 있습니다.')
+                raise ValueError('프로젝트 안의 16MB 이하 이미지 파일만 표시할 수 있습니다.')
             return {'mime': types[path.suffix.lower()], 'data': base64.b64encode(path.read_bytes()).decode('ascii')}
         if method == 'POST' and action == 'upload':
             name = body.get('name', '')
@@ -404,6 +457,9 @@ class Handler(BaseHTTPRequestHandler):
                     result[table] = [dict(r) for r in db.execute(
                         f'SELECT * FROM {table} WHERE project_id=? ORDER BY rowid DESC LIMIT 100', (project_id,))]
                 return result
+        if method == 'GET' and action == 'reference':
+            from reference_trace import get
+            return get(root, query.get('id', ''))
         if method == 'POST' and action == 'preview':
             return {'url': app.preview(project_id, body.get('path', 'index.html'))}
         if method == 'POST' and action == 'folder':

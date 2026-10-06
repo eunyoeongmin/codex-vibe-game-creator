@@ -56,7 +56,7 @@
 
 目前發行的執行檔尚未進行程式碼簽章。請從本儲存庫的 Releases 下載，可使用 `SHA256SUMS.txt` 核對檔案。
 
-版本 **0.1.1** · [更新紀錄](../CHANGELOG.md) · [維護與發行](maintaining.md)
+版本 **0.1.2** · [更新紀錄](../CHANGELOG.md) · [維護與發行](maintaining.md)
 
 ## 授權條款與第三方元件
 

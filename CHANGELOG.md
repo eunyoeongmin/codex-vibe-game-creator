@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.2
+
+- Display images in Codex replies and image-generation results.
+- Add fullscreen game previews, complete preview URLs and address copying.
+- Add model speed selection and fix Shift+Enter in choice-card text input.
+- Add image, sound and code-art asset management, previews, revision history and targeted AI modification requests.
+- Track reference research sources, user statements, AI interpretations, application plans and implementation locations; preserve revisions and flag changed evidence.
+- Link references to user/work decisions and asset versions, with a readable dashboard history.
+- Add draft developer, art, verification, game designer and reference roles; separate their instructions from orchestrator workflow.
+- Clarify design hypotheses, delegated choices, system relationships, interface feedback and unused-result handoff.
+- Package only explicitly listed application files; exclude local tests, fixtures and development data.
+- Preserve existing project data. Legacy assets still need registration, and missing historical research is not inferred. Existing customized role guides are not overwritten.
+
 ## 0.1.1
 
 - Attach files by drag and drop, or paste copied images into the message input.

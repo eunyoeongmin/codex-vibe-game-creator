@@ -32,9 +32,9 @@
 
 ### 체크포인트
 - 현재 project_id의 confirmed 기록이 10건 쌓일 때마다(10, 20, …) 질문을 멈추고 /summary 내용을 보여준 뒤 묻는다: "지금까지 정한 내용이에요. 이제 시작할까요, 더 정할까요?"
-- 시작을 고르면 아직 정하지 않은 항목은 AI가 제안안을 만들어 proposed로 저장하고, development.md의 개발 시작 절차로 넘어간다.
+- 시작을 고르면 아직 정하지 않은 항목은 AI가 제안안을 만들어 proposed로 저장하고, production-workflow.md의 개발 시작 절차로 넘어간다.
 - 더 정하겠다고 하면 다음 체크포인트까지 이어서 질문한다.
 - 사용자가 중간에 먼저 시작하자고 해도 같은 방식으로 처리한다.
-- 참조: [development.md](development.md)
+- 참조: [production-workflow.md](production-workflow.md)
 
 질문을 내는 방식(도구 사용)은 AGENTS.md의 "질문 방식"을 따른다.

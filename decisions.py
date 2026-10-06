@@ -168,7 +168,7 @@ def database(path, kind, *, write=False, project_root=None):
         tables = {r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         if 'dev_decisions' in tables:
             raise ValueError('구형 하네스 개발 기록 DB는 게임 작업 기록 DB로 사용할 수 없습니다.')
-        for table in ('work_decisions', 'user_decisions', 'user_references', 'topic_additions'):
+        for table in ('work_decisions', 'user_decisions', 'user_references', 'topic_additions', 'reference_traces'):
             if table in tables and c.execute(f'SELECT 1 FROM {table} WHERE project_id<>? LIMIT 1', (project_id,)).fetchone():
                 raise ValueError('다른 프로젝트 ID의 기록이 있는 DB는 사용할 수 없습니다.')
         if 'decisions' in tables:
@@ -405,6 +405,9 @@ def reference_command(args):
     nonempty(args.project_id, 'project_id')
     if args.command == 'add':
         return add_reference(args)
+    if args.command == 'trace-add':
+        from reference_trace import add
+        return add(args.project_root, args.id, json.loads(input_text(args)))
     with database(args.user_db, 'user', write=args.command == 'set-aspects') as c:
         exists = c is not None and c.execute(
             "SELECT 1 FROM sqlite_master WHERE name='user_references' AND type='table'").fetchone()
@@ -427,8 +430,15 @@ def reference_command(args):
             where.append('id=?'); values.append(args.id)
         if args.command == 'search':
             nonempty(args.query, 'query')
-            where.append('(instr(lower(title_or_url),lower(?)) > 0 OR instr(lower(user_note),lower(?)) > 0)')
+            search = '(instr(lower(title_or_url),lower(?)) > 0 OR instr(lower(user_note),lower(?)) > 0'
             values.extend([args.query, args.query])
+            from reference_trace import exists
+            if exists(c, 'reference_traces'):
+                search += (' OR EXISTS(SELECT 1 FROM reference_traces t WHERE t.reference_id=user_references.id '
+                           'AND t.project_id=user_references.project_id AND instr(lower('
+                           "t.topic || ' ' || t.user_quote || ' ' || t.assistant_reply || ' ' || t.reason || ' ' || t.payload),lower(?))>0)")
+                values.append(args.query)
+            where.append(search + ')')
         rows = [decoded_record(r) for r in c.execute(
             'SELECT * FROM user_references WHERE ' + ' AND '.join(where) +
             ' ORDER BY cast(substr(id,3) AS INTEGER) DESC LIMIT ? OFFSET ?',
@@ -436,7 +446,8 @@ def reference_command(args):
         if args.command == 'show':
             if not rows:
                 raise ValueError('해당 레퍼런스가 없습니다.')
-            return {'record': rows[0]}
+            from reference_trace import detail
+            return {'record': detail(c, args.project_id, rows[0])}
         return {'records': rows}
 
 def atomic_text(path, text):
@@ -725,14 +736,16 @@ def parser():
                 p.add_argument('query'); p.add_argument('--semantic', action='store_true')
     references = stores.add_parser('reference', help='결정의 근거가 되는 레퍼런스')
     sub = references.add_subparsers(dest='command', required=True)
-    for command in ('add', 'list', 'show', 'search', 'set-aspects'):
+    for command in ('add', 'list', 'show', 'search', 'set-aspects', 'trace-add'):
         p = sub.add_parser(command)
         if command == 'add':
             p.add_argument('--input', help='UTF-8 JSON 파일; 생략하면 stdin')
-        elif command in ('show', 'set-aspects'):
+        elif command in ('show', 'set-aspects', 'trace-add'):
             p.add_argument('id')
             if command == 'set-aspects':
                 p.add_argument('--aspects', nargs='*', required=True, choices=REFERENCE_ASPECTS)
+            if command == 'trace-add':
+                p.add_argument('--input', help='UTF-8 JSON 파일; 생략하면 stdin')
         else:
             pagination(p)
             if command == 'search':
@@ -765,11 +778,28 @@ def parser():
     progress.add_argument('--total', type=int, required=True)
     progress.add_argument('--note', required=True)
     sub.add_parser('list')
+    assets = stores.add_parser('asset', help='프로젝트 에셋 관리')
+    sub = assets.add_subparsers(dest='command', required=True)
+    for name in ('add', 'update', 'list', 'show', 'history'):
+        p = sub.add_parser(name)
+        if name in ('update', 'show', 'history'):
+            p.add_argument('id')
+        if name in ('add', 'update'):
+            p.add_argument('--input', help='UTF-8 JSON 파일; 생략하면 stdin')
+        if name == 'update':
+            p.add_argument('--revision', type=int, required=True)
+        if name == 'list':
+            p.add_argument('--kind', choices=('image', 'sound'))
+            p.add_argument('--status', choices=('temporary', 'proposed', 'confirmed', 'retired'))
+            p.add_argument('--query')
     return root
 
 def run(args):
     args.project_root, args.project_id = find_project()
     args.user_db = args.work_db = project_path(args.project_root, 'data/decisions.sqlite')
+    if args.store == 'asset':
+        from asset_store import command
+        return command(args)
     if args.store == 'milestone':
         return milestone_command(args)
     if args.store == 'topic':

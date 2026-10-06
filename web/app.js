@@ -74,12 +74,13 @@ $('toggle-theme').onclick = () => { appearance.theme = appearance.theme === 'dar
 $('language').onchange = () => run(async () => {
   const settings = await api('preferences', {language: $('language').value});
   I18n.apply(settings.language); applyAppearance(); renderUploads();
+  window.AssetUI?.render();
   planningKey = ''; productionKey = ''; if (planning) renderPlanning(planning);
   // Keep drafts, editor changes and question answers when changing languages.
   for (const card of $('questions').children) {
     const buttons = card.querySelector('.question-actions')?.children;
     if (buttons) { buttons[0].textContent = t('건너뛰기'); buttons[1].textContent = t('답변 보내기'); }
-    for (const input of card.querySelectorAll('input')) input.placeholder = t('직접 입력할 수도 있어요');
+    for (const input of card.querySelectorAll('textarea')) input.placeholder = t('직접 입력할 수도 있어요 · Shift+Enter로 줄바꿈');
   }
   if (!current) $('page-title').textContent = t('아이디어가 게임이 되는 곳');
   await loadProjects(); await loadStatus();
@@ -162,6 +163,7 @@ async function loadStatus() {
   for (const model of status.models || []) $('model').add(new Option(model.displayName || model.model, model.model));
   $('model').value = previous;
   renderEfforts($('effort').value);
+  renderSpeeds($('speed').value);
   if (wasPending && status.sandbox_readiness === 'ready' && current && !connected && !$('connect').disabled) await connect();
   return status;
 }
@@ -180,8 +182,23 @@ function renderEfforts(preferred) {
   $('effort').disabled = !efforts.length;
 }
 
+function renderSpeeds(preferred) {
+  const model = modelCatalog.find(m => m.model === $('model').value) || modelCatalog.find(m => m.isDefault);
+  const tiers = model?.serviceTiers?.length ? model.serviceTiers : (model?.additionalSpeedTiers || []).map(id => ({id: id === 'fast' ? 'priority' : id, name: id}));
+  $('speed').replaceChildren(new Option(t('기본 속도'), 'default'));
+  for (const tier of tiers) {
+    if (tier.id === 'default') continue;
+    const option = new Option(['fast', 'priority'].includes(tier.id) ? t('빠르게 · 사용량 증가') : tier.name, tier.id);
+    option.title = tier.description || ''; $('speed').add(option);
+  }
+  $('speed').value = [...$('speed').options].some(o => o.value === preferred) ? preferred : 'default';
+  $('speed').disabled = $('speed').options.length < 2;
+  $('speed').title = $('speed').selectedOptions[0]?.title || t('이 모델에서 사용할 수 있는 속도');
+}
+
 async function openProject(project) {
   clearUploads(); sending = false;
+  window.AssetUI?.reset();
   viewVersion++; current = project; cursor = 0; itemNodes.clear(); lastQuestionKey = '';
   const version = viewVersion;
   chatHistory = {ready: false, busy: false, before: null, more: false};
@@ -194,7 +211,8 @@ async function openProject(project) {
   $('messages').classList.add('history-initial');
   $('instruction-history').replaceChildren();
   $('message').value = ''; $('editor-panel').hidden = true; $('preview-frame').removeAttribute('src');
-  $('model').value = project.model || selectedModel; renderEfforts(); renderUploads(); notice('');
+  $('preview-link').removeAttribute('href'); $('preview-link').textContent = ''; $('preview-actions').hidden = true;
+  $('model').value = project.model || selectedModel; renderEfforts(); renderSpeeds(project.info?.requested_service_tier); renderUploads(); notice('');
   await loadHistory(true);
   if (version !== viewVersion || !chatHistory.ready) return;
   await loadProjects(); await loadFiles(); await poll(); await loadUsage();
@@ -250,7 +268,7 @@ $('history-retry').onclick = () => run(async () => {
 async function connect() {
   $('connect').disabled = true; $('connection-state').textContent = t('Codex 연결 중');
   try {
-    await projectApi('connect', {model: $('model').value || null, effort: $('effort').value || null}); connected = true;
+    await projectApi('connect', {model: $('model').value || null, effort: $('effort').value || null, service_tier: $('speed').value}); connected = true;
     notice(''); await poll();
   } finally { $('connect').disabled = false; }
 }
@@ -262,8 +280,52 @@ function addMessage(kind, text, target = $('messages')) {
 }
 function renderAgent(record, text) {
   record.rawText = text;
-  record.body.textContent = text.replaceAll('[[HARNESS:SHOW_SUMMARY]]', '');
-  record.node.hidden = !record.body.textContent;
+  const visible = text.replaceAll('[[HARNESS:SHOW_SUMMARY]]', '');
+  const parts = document.createDocumentFragment();
+  record.images ||= new Map();
+  // Keep code examples as text and render only explicit Markdown image references.
+  const pattern = /```[\s\S]*?(?:```|$)|`[^`\n]+`|!?\[([^\]\n]*)\]\((<[^>\n]+>|[^\n]+?)\)/g;
+  let offset = 0;
+  for (const match of visible.matchAll(pattern)) {
+    if (match[1] === undefined) continue;
+    let path = match[2].replace(/^<|>$/g, '').trim();
+    if (!match[0].startsWith('!') && !/\.(png|jpe?g|gif|webp|bmp|avif)(?:[?#].*)?$/i.test(path)) continue;
+    if (/^[a-z][a-z\d+.-]*:/i.test(path) && !/^https?:\/\//i.test(path) && !/^[a-z]:[\\/]/i.test(path)) continue;
+    if (!/^https?:\/\//i.test(path)) { try { path = decodeURIComponent(path); } catch (_) {} }
+    parts.append(document.createTextNode(visible.slice(offset, match.index)));
+    let image = record.images.get(path);
+    if (!image) {
+      image = chatImage(path, match[1]); record.images.set(path, image);
+    }
+    parts.append(image); offset = match.index + match[0].length;
+  }
+  parts.append(document.createTextNode(visible.slice(offset)));
+  record.body.replaceChildren(parts);
+  record.node.hidden = !visible;
+}
+
+function chatImage(path, alt = '', source = null) {
+  const frame = element('figure', 'chat-image'), image = element('img'), status = element('span', 'muted');
+  image.alt = alt || path; image.referrerPolicy = 'no-referrer';
+  frame.append(image, status);
+  const version = viewVersion, projectId = current.id;
+  const failed = () => { image.hidden = true; status.textContent = t('이미지를 불러오지 못했습니다: {0}', path); };
+  image.onerror = failed;
+  if (source) image.src = source;
+  else if (/^https?:\/\//i.test(path)) image.src = path;
+  else api(`projects/${projectId}/image?path=${encodeURIComponent(path)}`).then(result => {
+    if (version === viewVersion) image.src = `data:${result.mime};base64,${result.data}`;
+  }).catch(failed);
+  return frame;
+}
+
+function generatedImageSource(result) {
+  if (typeof result !== 'string' || result.length > 24 * 1024 * 1024) return null;
+  const data = result.replace(/^data:image\/(?:png|jpeg|gif|webp);base64,/, '');
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(data)) return null;
+  const mime = data.startsWith('iVBORw0KGgo') ? 'image/png' : data.startsWith('/9j/') ? 'image/jpeg' :
+    data.startsWith('R0lGOD') ? 'image/gif' : data.startsWith('UklGR') ? 'image/webp' : null;
+  return mime ? `data:${mime};base64,${data}` : null;
 }
 function userMessageText(text) {
   // Decode only known reply envelopes for display; preserve the original event.
@@ -309,6 +371,12 @@ function showEvent(event, target = $('messages'), historical = false) {
       let record = itemNodes.get(item.id);
       if (!record) { record = addMessage('agent', '', target); itemNodes.set(item.id, record); }
       if (item.text) renderAgent(record, item.text);
+    } else if (item.type === 'imageGeneration' && event.phase === 'completed') {
+      if (itemNodes.has(item.id)) return;
+      const source = generatedImageSource(item.result);
+      if (!source && !item.savedPath) return;
+      const record = addMessage('agent', '', target);
+      record.body.append(chatImage(item.savedPath || '', '', source)); itemNodes.set(item.id, record);
     } else if (item.type === 'commandExecution' || item.type === 'fileChange') {
       let record = itemNodes.get(item.id);
       if (!record) {
@@ -339,12 +407,15 @@ async function poll() {
     connected = result.connected; working = result.working; activity = result.activity || null;
     if (result.project.model && document.activeElement !== $('model')) $('model').value = result.project.model;
     if (document.activeElement !== $('effort')) renderEfforts(result.project.info?.requested_effort);
+    if (document.activeElement !== $('speed')) renderSpeeds(result.project.info?.requested_service_tier);
     $('connection-state').textContent = connected ? (working ? t('Codex 작업 중') : t('대화 연결됨')) : t('연결 대기');
     $('working-label').textContent = working ? t('작업 중에도 메시지를 보낼 수 있어요') : '';
     $('stop').hidden = !working; $('connect').hidden = connected;
     $('model').disabled = false;
     updateSendButton();
     renderPlanning(result.progress);
+    window.AssetUI?.attention(result.asset_counts);
+    if (!$('tab-assets').hidden) await window.AssetUI?.load();
     renderQuestions(result.progress?.show_summary ? [] : result.questions); renderEnvironment(result.project); renderContext(result.project.info?.token_usage);
     renderActivity();
     if (follow) box.scrollTop = box.scrollHeight;
@@ -467,8 +538,9 @@ function renderQuestions(questions) {
     const card = element('div', 'question-card'), inputs = [];
     for (const question of group.questions) {
       card.append(element('h4', '', question.title));
-      const options = element('div', 'options'), input = element('input');
-      input.placeholder = t('직접 입력할 수도 있어요'); input.setAttribute('aria-label', question.title + t(' 직접 입력'));
+      const options = element('div', 'options'), input = element('textarea');
+      input.rows = 2;
+      input.placeholder = t('직접 입력할 수도 있어요 · Shift+Enter로 줄바꿈'); input.setAttribute('aria-label', question.title + t(' 직접 입력'));
       for (const option of question.options || []) {
         const node = button(option, () => { input.value = option; for (const b of options.children) b.classList.toggle('selected', b === node); input.focus(); });
         options.append(node);
@@ -489,7 +561,7 @@ function renderQuestions(questions) {
       finally { if (!accepted) { submitting = false; for (const b of actions.children) b.disabled = false; } }
     };
     for (const input of inputs) input.addEventListener('keydown', event => {
-      if (event.key === 'Enter' && !event.isComposing && event.keyCode !== 229) {
+      if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229) {
         event.preventDefault();
         if (!event.repeat) run(() => answer(false));
       }
@@ -518,7 +590,8 @@ async function loadUsage() {
     $('quota-brief').textContent = t('사용량 정보 없음');
     $('quota-details').append(element('p', 'muted', t(result.message))); return;
   }
-  const buckets = Object.values(result.rateLimitsByLimitId || {default: result.rateLimits});
+  const namedBuckets = Object.values(result.rateLimitsByLimitId || {});
+  const buckets = namedBuckets.length ? namedBuckets : [result.rateLimits];
   const brief = [];
   for (const bucket of buckets) {
     if (!bucket) continue;
@@ -581,6 +654,9 @@ async function loadRecords() {
       const card = element('div', 'record');
       card.append(element('small', '', `${record.id} · ${record.category || record.area || record.kind} · ${record.status || ''}`));
       card.append(element('div', '', (record.topic ? record.topic + ': ' : '') + (record.decision || record.title_or_url)));
+      if (table === 'user_references') {
+        card.append(referenceDetails(record)); $('records').append(card); continue;
+      }
       const details = element('details'); details.append(element('summary', '', t('원문과 근거 보기')), element('pre', '', JSON.stringify(record, null, 2)));
       card.append(details); $('records').append(card);
     }
@@ -684,15 +760,17 @@ $('summary-start').onclick = () => run(() => summaryAction('start'));
 $('summary-more').onclick = () => run(() => summaryAction('more'));
 $('model').onchange = () => run(async () => {
   renderEfforts();
+  renderSpeeds($('speed').value);
   if (!current || !connected) { selectedModel = $('model').value; return; }
   await saveModelSettings();
 });
 async function saveModelSettings() {
-  const result = await projectApi('model', {model: $('model').value, effort: $('effort').value || null});
-  $('model').value = result.model; renderEfforts(result.effort);
-  notice(t('다음 작업부터 {0} / 추론 수준 {1}을 사용합니다.', result.model, result.effort || t('기본값')));
+  const result = await projectApi('model', {model: $('model').value, effort: $('effort').value || null, service_tier: $('speed').value});
+  $('model').value = result.model; renderEfforts(result.effort); renderSpeeds(result.service_tier);
+  notice(t('모델·추론 수준·속도 설정을 다음 작업부터 적용합니다.'));
 }
 $('effort').onchange = () => run(async () => { if (current && connected) await saveModelSettings(); });
+$('speed').onchange = () => run(async () => { if (current && connected) await saveModelSettings(); });
 $('login').onclick = () => {
   const popup = window.open('about:blank', '_blank');
   run(async () => { try {
@@ -751,7 +829,15 @@ window.addEventListener('drop', event => { if (isFileDrag(event)) event.preventD
 window.addEventListener('dragend', clearDrop);
 $('refresh-files').onclick = () => run(loadFiles); $('refresh-records').onclick = () => run(loadRecords);
 $('save-file').onclick = () => run(async () => { const result = await projectApi('file', {path: openFile, text: $('editor').value, digest: fileDigest}); fileDigest = result.digest; notice(t('파일을 저장했습니다.')); });
-$('preview-button').onclick = () => run(async () => { const result = await projectApi('preview', {path: $('preview-path').value}); $('preview-frame').src = result.url; });
+$('preview-button').onclick = () => run(async () => {
+  const version = viewVersion;
+  const result = await projectApi('preview', {path: $('preview-path').value});
+  if (version !== viewVersion) return;
+  $('preview-frame').src = result.url;
+  $('preview-link').href = result.url; $('preview-link').textContent = result.url; $('preview-actions').hidden = false;
+});
+$('preview-fullscreen').onclick = () => run(async () => { await $('preview-frame').requestFullscreen(); });
+$('preview-copy').onclick = () => run(async () => { await navigator.clipboard.writeText($('preview-link').href); notice(t('미리보기 주소를 복사했습니다.')); });
 $('usage-button').onclick = () => { $('usage-dialog').showModal(); run(loadUsage); };
 $('close-usage').onclick = () => $('usage-dialog').close();
 $('refresh-usage').onclick = () => run(loadUsage);
@@ -759,6 +845,7 @@ for (const tab of document.querySelectorAll('[data-tab]')) tab.onclick = () => r
   for (const node of document.querySelectorAll('[data-tab]')) node.classList.toggle('active', node === tab);
   for (const node of document.querySelectorAll('.tab-content')) node.hidden = node.id !== 'tab-' + tab.dataset.tab;
   if (tab.dataset.tab === 'records') await loadRecords();
+  if (tab.dataset.tab === 'assets') await window.AssetUI?.load();
   if (tab.dataset.tab === 'files') await loadFiles();
 });
 run(async () => {

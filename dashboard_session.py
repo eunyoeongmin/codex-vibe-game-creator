@@ -39,6 +39,7 @@ class ProjectSession:
         self.bootstrap_failed = False
         self.requested_model = self.project.get('model')
         self.requested_effort = self.project.get('info', {}).get('requested_effort')
+        self.requested_service_tier = self.project.get('info', {}).get('requested_service_tier', 'default')
         self.closed = False
         self.planning = None
         self.instructions = InstructionBundle()
@@ -46,15 +47,17 @@ class ProjectSession:
         self.applied_language = None
         self.rpc = CodexRpc(codex_home, self.root, self.on_event, self.on_request)
 
-    def connect(self, model=None, effort=None):
+    def connect(self, model=None, effort=None, service_tier=None):
         self.project = self.state.project(self.id)
         fresh = not self.thread_id
         self.requested_effort = effort or self.requested_effort
+        self.requested_service_tier = service_tier or self.requested_service_tier
         config = {'sandbox_workspace_write.writable_roots': [self.root.as_posix()],
                   'sandbox_workspace_write.network_access': True,
                   'sandbox_workspace_write.exclude_tmpdir_env_var': True,
                   'sandbox_workspace_write.exclude_slash_tmp': True}
         params = {'cwd': str(self.root), 'runtimeWorkspaceRoots': [str(self.root)],
+                  'serviceTier': self.requested_service_tier,
                   'approvalPolicy': 'never', 'sandbox': 'workspace-write',
                   'developerInstructions': self.instructions.render('host', language=LANGUAGES[self.requested_language]), 'config': config}
         if self.requested_effort:
@@ -82,6 +85,7 @@ class ProjectSession:
         info = {**self.project.get('info', {}), 'cwd': result['cwd'], 'instruction_sources': result.get('instructionSources', []),
                 'sandbox': policy, 'writable_roots': [str(self.root)],
                 'model': result.get('model'), 'requested_effort': self.requested_effort, 'thread_id': self.thread_id,
+                'requested_service_tier': self.requested_service_tier,
                 'instruction_bundle': self.instructions.source, 'language': self.applied_language}
         self.state.update(self.id, thread_id=self.thread_id, model=result.get('model'), info=info)
         self.state.event(self.id, 'connected', **info)
@@ -105,7 +109,7 @@ class ProjectSession:
         return self.send_message(self.instructions.render(section, **values),
                                  startup=startup, instruction_section=section)
 
-    def send_message(self, text, *, startup=False, attachments=None, instruction_section=None):
+    def send_message(self, text, *, startup=False, attachments=None, instruction_section=None, display_text=None):
         if not isinstance(text, str) or not text.strip() or len(text) > 100000:
             raise ValueError('메시지는 1~100,000자로 입력하세요.')
         with self.lock:
@@ -125,6 +129,7 @@ class ProjectSession:
             else:
                 params = {
                     'threadId': self.thread_id, 'input': content, 'cwd': str(self.root),
+                    'serviceTier': self.requested_service_tier,
                     'runtimeWorkspaceRoots': [str(self.root)],
                     'approvalPolicy': 'never', 'sandboxPolicy': sandbox_policy(self.root),
                     'clientUserMessageId': str(uuid.uuid4())}
@@ -137,7 +142,7 @@ class ProjectSession:
                 self.turn_id = None if turn_id in self.finished_turns else turn_id
                 if self.requested_model:
                     self.state.merge_info(self.id, model=self.requested_model)
-            self.state.event(self.id, 'startup' if startup else 'user', text=text,
+            self.state.event(self.id, 'startup' if startup else 'user', text=text if display_text is None else display_text,
                              **({'attachments': [path.relative_to(self.root).as_posix()
                                                  for path in attachments]} if attachments else {}))
             if instruction_section:
@@ -149,12 +154,13 @@ class ProjectSession:
                 self.state.update(self.id, startup_sent=0 if self.bootstrap_failed else 1)
             return result
 
-    def change_model(self, model, effort=None):
+    def change_model(self, model, effort=None, service_tier='default'):
         with self.lock:
             self.requested_model = model
             self.requested_effort = effort
+            self.requested_service_tier = service_tier
             self.state.update(self.id, model=model)
-            self.state.merge_info(self.id, requested_effort=effort)
+            self.state.merge_info(self.id, requested_effort=effort, requested_service_tier=service_tier)
             self.state.event(self.id, 'model_selected', text=f'다음 작업부터 {model} / 추론 수준 {effort or "기본값"}을 사용합니다.')
 
     def interrupt(self):
@@ -194,7 +200,7 @@ class ProjectSession:
                 self.planning.open_summary(self.id)
             if item.get('type') == 'agentMessage' and item.get('questions'):
                 self.state.add_question(self.id, item['id'], {'questions': item['questions'], 'mode': 'native_async'})
-            if item.get('type') in ('agentMessage', 'commandExecution', 'fileChange', 'plan'):
+            if item.get('type') in ('agentMessage', 'commandExecution', 'fileChange', 'plan', 'imageGeneration'):
                 self.state.event(self.id, 'item', phase=method.split('/')[-1], item=item)
         elif method == 'turn/diff/updated':
             self.state.event(self.id, 'diff', text=params.get('diff', ''))

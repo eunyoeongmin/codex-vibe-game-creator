@@ -12,23 +12,36 @@ ROOT = Path(__file__).resolve().parent
 FILES = ('VERSION', 'LICENSE', 'README.md', 'CHANGELOG.md', 'bootstrap.json', 'start.bat', 'start.ps1',
          'requirements-runtime.txt', 'runtime_setup.py', 'new_project.py', 'decisions.py',
          'codex_bridge.py', 'dashboard.py', 'dashboard_state.py', 'dashboard_session.py',
-         'dashboard_planning.py', 'instruction_bundle.py', 'localization.py')
-FOLDERS = ('web', 'template', 'instructions', 'docs')
+         'dashboard_planning.py', 'instruction_bundle.py', 'localization.py', 'asset_store.py', 'reference_trace.py')
+# List every shipped resource explicitly. Test fixtures and scratch files must
+# never become release content merely by being placed beside runtime resources.
+RESOURCE_FILES = (
+    'web/index.html', 'web/style.css', 'web/app.js', 'web/assets.js',
+    'web/i18n.js', 'web/locales.json', 'web/references.js',
+    'instructions/dashboard.toml',
+    'template/AGENTS.md',
+    'template/agents/developer.md', 'template/agents/art.md',
+    'template/agents/verification.md', 'template/agents/game-designer.md',
+    'template/agents/reference.md', 'template/guide/reference-tracing.md',
+    'template/guide/commands.md', 'template/guide/assets.md',
+    'template/guide/work-decisions.md', 'template/guide/topic-additions.md',
+    'template/guide/references.md', 'template/guide/production-workflow.md',
+    'template/guide/product-design.md', 'template/guide/genre.md',
+    'template/genres/steam-tags.md', 'template/genres/steam-genres.md',
+    'template/catalogs/product-design-topics.md',
+    'docs/third-party-licenses.md', 'docs/maintaining.md',
+    'docs/README.ko.md', 'docs/README.ja.md',
+    'docs/README.zh-Hans.md', 'docs/README.zh-Hant.md',
+)
 
 
 def payload_files():
-    result = {name: ROOT / name for name in FILES}
+    result = {name: ROOT / name for name in (*FILES, *RESOURCE_FILES)}
     # This is the end-user instruction document, never the local developer override.
     result['AGENTS.md'] = ROOT / 'template/AGENTS.md'
-    for folder in FOLDERS:
-        for path in sorted((ROOT / folder).rglob('*')):
-            if path.is_symlink() or not path.resolve().is_relative_to(ROOT / folder):
-                raise ValueError(f'External distribution path: {path}')
-            if path.is_file():
-                if any(p.startswith('.') or p == '__pycache__' for p in path.relative_to(ROOT).parts):
-                    raise ValueError(f'Unexpected hidden distribution file: {path}')
-                result[path.relative_to(ROOT).as_posix()] = path
     for name, path in result.items():
+        if path.is_symlink() or not path.resolve().is_relative_to(ROOT.resolve()):
+            raise ValueError(f'External distribution path: {path}')
         if not path.is_file():
             raise ValueError(f'Missing distribution file: {name}')
     return result

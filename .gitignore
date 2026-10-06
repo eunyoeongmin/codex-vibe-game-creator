@@ -11,3 +11,11 @@ __pycache__/
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+
+# Local development tests and their fixtures.
+test_*.py
+*_test.py
+*.test.*
+*.spec.*
+tests/
+__tests__/

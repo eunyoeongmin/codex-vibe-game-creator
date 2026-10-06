@@ -146,7 +146,7 @@ class State:
                 'type': 'agentMessage', 'id': event['item_id'], 'text': text + event['text']}}
         elif kind == 'item':
             item = event['item']
-            if item['type'] not in ('agentMessage', 'fileChange'):
+            if item['type'] not in ('agentMessage', 'fileChange', 'imageGeneration'):
                 return
             key = 'item:' + item['id']
             if item['type'] == 'agentMessage' and not item.get('text') and not item.get('questions'):
