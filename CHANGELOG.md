@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.2.0
+
+- Add a play workspace with registered DOM/Canvas targets, opt-in bounded action observations and captured game states attached to focused AI requests.
+- Create state-bound alternatives, restore both previews to the same play point, and preserve the original when adopting; reject stale game or alternative files.
+- Add zoomable system and content-flow diagrams with neighborhood/downstream views, record/source evidence, and separate planned, implemented, observed and stale links.
+
+- Add sound direction with registered audio cues, role volumes, loop segments, fades, overlap limits, priority and voice-triggered music ducking; publish and integrate with game events.
+- Add balance comparisons using registered game calculations, user-defined input scenarios and targets, source/data change detection and saved results; explicit requests apply adjustments.
+
+- Add versioned play saves, named play points and explicit state migrations with original saves preserved.
+- Add game-localization editing, missing translation/variable checks and visible DOM string overflow reports.
+- Connect controlled play comparisons, evidence-based system integration plans and content progression tables to user selections and implementation/work records.
+
+- Mark regions on captured images, attach their coordinates and descriptions to AI requests, and compare user-supplied before/after images.
+- Browse structured data relationships and source evidence separately from code text matches; flag changed evidence and missing targets.
+- Edit and replay dialogue, movement, media, transitions and waits in timelines. Publish reusable game JSON/runtime files and request integration with existing game triggers.
+
+- Add a Creation tools tab: edit registered JSON/CSV game content with typed fields, bounds, references, conflict checks and revision history.
+- Save play feedback with screen capture or uploaded images, optional game-provided state, and targeted AI requests.
+- Save and restore production checkpoints, preserving the current files before restoration and notifying the next AI turn of the changed workspace.
+- Create isolated playable alternatives, compare them side by side and explicitly adopt one with a checkpoint and stale-main protection.
+- Add an independent story role and workspace for characters, events, branches, conditions and game effects; AI proposals require user confirmation.
+- Export game ZIPs with launch instructions, excluding harness files and unused assets; reject missing static HTML/CSS/module resources.
+- Include the new UI labels in all five supported languages and copy the required support modules into new and reconnected projects.
+
 ## 0.1.2
 
 - Display images in Codex replies and image-generation results.

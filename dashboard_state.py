@@ -1,5 +1,6 @@
 """Dashboard-owned project registry and conversation UI history."""
 from __future__ import annotations
+from message_catalog import text as _msg
 from contextlib import closing
 import json
 from pathlib import Path
@@ -87,7 +88,7 @@ class State:
     def add(self, path):
         root, project_id = find_project(path)
         if root.parent != self.projects_root or root.name != project_id:
-            raise ValueError('허용된 프로젝트 보관 위치가 아닙니다.')
+            raise ValueError(_msg('py.dashboard_state.message'))
         marker = json.loads((root / '.project').read_text(encoding='utf-8'))
         with self.lock, closing(self.connect()) as db:
             db.execute('INSERT INTO projects(id,name,path) VALUES(?,?,?)',
@@ -101,24 +102,24 @@ class State:
 
     def project(self, project_id):
         if not re.fullmatch(r'game-[a-f0-9]{32}', project_id or ''):
-            raise ValueError('유효한 프로젝트 ID가 필요합니다.')
+            raise ValueError(_msg('py.dashboard_state.message.2'))
         with closing(self.connect()) as db:
             row = db.execute('SELECT * FROM projects WHERE id=?', (project_id,)).fetchone()
         if row is None:
-            raise ValueError('등록된 프로젝트가 아닙니다.')
+            raise ValueError(_msg('ui.this.project.is.not.registered'))
         result = dict(row)
         root = Path(result['path'])
         if root.resolve() != root or root.parent != self.projects_root:
-            raise ValueError('프로젝트 경로가 변경되었습니다.')
+            raise ValueError(_msg('ui.the.project.path.has.changed'))
         marker_root, marker_id = find_project(root)
         if marker_root != root or marker_id != project_id:
-            raise ValueError('프로젝트 마커가 등록 정보와 일치하지 않습니다.')
+            raise ValueError(_msg('ui.the.project.marker.does.not.match.the.registry'))
         result['info'] = json.loads(result['info'])
         return result
 
     def update(self, project_id, **fields):
         if not fields.keys() <= {'thread_id', 'model', 'info', 'startup_sent'}:
-            raise ValueError('변경할 수 없는 프로젝트 정보입니다.')
+            raise ValueError(_msg('py.dashboard_state.message.3'))
         values = [json.dumps(v, ensure_ascii=False) if k == 'info' else v for k, v in fields.items()]
         with self.lock, closing(self.connect()) as db:
             db.execute('UPDATE projects SET ' + ','.join(f'{k}=?' for k in fields) + ' WHERE id=?',
@@ -161,7 +162,7 @@ class State:
     def history(self, project_id, before=None, limit=30):
         limit = max(1, min(int(limit), 100))
         if before is not None and before < 1:
-            raise ValueError('Invalid history cursor')
+            raise ValueError(_msg('py.dashboard_state.invalid.history.cursor'))
         with closing(self.connect()) as db:
             # The history snapshot and live-event cursor must describe the same instant.
             db.execute('BEGIN')
@@ -213,12 +214,12 @@ class State:
 
 def safe_file(root, relative):
     if not isinstance(relative, str) or not relative or '\x00' in relative:
-        raise ValueError('프로젝트 안의 파일 경로가 필요합니다.')
+        raise ValueError(_msg('ui.a.path.inside.the.project.is.required'))
     # Reject drive names, NTFS streams and absolute paths before canonical containment.
     normalized = relative.replace('\\', '/')
     if normalized.startswith('/') or ':' in normalized or '..' in normalized.split('/'):
-        raise ValueError('프로젝트 밖 경로는 사용할 수 없습니다.')
+        raise ValueError(_msg('ui.paths.outside.the.project.are.not.allowed'))
     path = project_path(root, normalized)
     if path == Path(root).resolve():
-        raise ValueError('파일 경로가 필요합니다.')
+        raise ValueError(_msg('ui.a.file.path.is.required'))
     return path

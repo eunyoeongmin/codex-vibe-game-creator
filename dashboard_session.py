@@ -1,5 +1,6 @@
 """Long-lived project conversations, asynchronous choices, and fixed sandbox scope."""
 from __future__ import annotations
+from message_catalog import text as _msg
 from collections import deque
 from datetime import datetime, timezone
 import json
@@ -31,6 +32,8 @@ class ProjectSession:
         self.turn_id = None
         self.activity_lock = threading.Lock()
         self.active_items = {}
+        self.task_plan = []
+        self.agent_work = {}
         self.thread_id = self.project['thread_id']
         self.live_questions = {}
         self.finished_turns = deque(maxlen=128)
@@ -75,11 +78,11 @@ class ProjectSession:
         policy = result.get('sandbox', {})
         if policy.get('type') != 'workspaceWrite' or Path(result['cwd']).resolve() != self.root:
             self.close()
-            raise RpcError('Codex가 요청한 프로젝트 쓰기 범위를 적용하지 않아 대화를 시작하지 않았습니다.')
+            raise RpcError(_msg('ui.codex.did.not.apply.the.required.write.scope'))
         roots = {Path(p).resolve() for p in policy.get('writableRoots', [])}
         if any(p != self.root for p in roots) or result.get('approvalPolicy') != 'never':
             self.close()
-            raise RpcError('프로젝트 밖 쓰기 권한이 감지되어 대화를 시작하지 않았습니다.')
+            raise RpcError(_msg('ui.write.access.outside.the.project.was.detected.the'))
         self.requested_model = result.get('model')
         self.requested_effort = result.get('reasoningEffort') or self.requested_effort
         info = {**self.project.get('info', {}), 'cwd': result['cwd'], 'instruction_sources': result.get('instructionSources', []),
@@ -109,10 +112,24 @@ class ProjectSession:
         return self.send_message(self.instructions.render(section, **values),
                                  startup=startup, instruction_section=section)
 
-    def send_message(self, text, *, startup=False, attachments=None, instruction_section=None, display_text=None):
+    def send_message(self, text, *, startup=False, attachments=None, instruction_section=None, display_text=None, workspace_root=None):
         if not isinstance(text, str) or not text.strip() or len(text) > 100000:
-            raise ValueError('메시지는 1~100,000자로 입력하세요.')
+            raise ValueError(_msg('ui.messages.must.contain.characters'))
         with self.lock:
+            work_root = Path(workspace_root or self.root).resolve()
+            if not work_root.is_relative_to(self.root) or not work_root.is_dir():
+                raise ValueError(_msg('py.dashboard_session.the.work.folder.must.be.inside.this.project'))
+            if workspace_root is not None and self.turn_id:
+                raise ValueError(_msg('py.dashboard_session.wait.for.the.current.task.before.changing.its'))
+            from content_editor import database, entries
+            with database(self.root) as db:
+                changes = entries(db, 'control')
+            change = next((item for item in changes if item.get('notice')), None)
+            original_text = text
+            if change:
+                addition = self.instructions.render('workspace_change', context=json.dumps(change, ensure_ascii=False))
+                text = addition + '\n\n' + text
+                if display_text is None: display_text = original_text
             if not self.turn_id and self.thread_id and self.applied_language != self.requested_language:
                 self.connect(self.requested_model, self.requested_effort)
             if startup:
@@ -128,10 +145,10 @@ class ProjectSession:
                     'threadId': self.thread_id, 'expectedTurnId': active, 'input': content})
             else:
                 params = {
-                    'threadId': self.thread_id, 'input': content, 'cwd': str(self.root),
+                    'threadId': self.thread_id, 'input': content, 'cwd': str(work_root),
                     'serviceTier': self.requested_service_tier,
-                    'runtimeWorkspaceRoots': [str(self.root)],
-                    'approvalPolicy': 'never', 'sandboxPolicy': sandbox_policy(self.root),
+                    'runtimeWorkspaceRoots': [str(work_root)],
+                    'approvalPolicy': 'never', 'sandboxPolicy': sandbox_policy(work_root),
                     'clientUserMessageId': str(uuid.uuid4())}
                 if self.requested_model:
                     params['model'] = self.requested_model
@@ -148,6 +165,10 @@ class ProjectSession:
             if instruction_section:
                 self.record_instruction(instruction_section, text, method='turn/steer' if active else 'turn/start',
                                         turn_id=active or result['turn']['id'])
+            if change:
+                self.record_instruction('workspace_change', addition, method='turn/start', turn_id=active or result['turn']['id'])
+                with database(self.root) as db:
+                    db.execute("DELETE FROM entries WHERE kind='control' AND id='restored' AND value=?", (json.dumps(change, ensure_ascii=False, allow_nan=False),))
             if startup:
                 self.bootstrap_turn = result.get('turn', {}).get('id')
                 self.starting_bootstrap = False
@@ -161,7 +182,7 @@ class ProjectSession:
             self.requested_service_tier = service_tier
             self.state.update(self.id, model=model)
             self.state.merge_info(self.id, requested_effort=effort, requested_service_tier=service_tier)
-            self.state.event(self.id, 'model_selected', text=f'다음 작업부터 {model} / 추론 수준 {effort or "기본값"}을 사용합니다.')
+            self.state.event(self.id, 'model_selected', text=_msg('ui.next.turn.reasoning.effort' ,model,effort or _msg('ui.default')))
 
     def interrupt(self):
         with self.lock:
@@ -174,6 +195,8 @@ class ProjectSession:
         if method == 'turn/started':
             with self.activity_lock:
                 self.active_items.clear()
+                self.task_plan = []
+                self.agent_work.clear()
             self.turn_id = params['turn']['id']
             self.state.event(self.id, 'turn_started', turn_id=self.turn_id)
         elif method == 'turn/completed':
@@ -187,6 +210,10 @@ class ProjectSession:
                 with self.activity_lock:
                     self.active_items.clear()
             self.state.event(self.id, 'turn_completed', status=turn['status'], error=turn.get('error'))
+        elif method == 'turn/plan/updated':
+            with self.activity_lock:
+                self.task_plan = [{'step': str(step.get('step', ''))[:300], 'status': step.get('status')}
+                                  for step in params.get('plan', []) if isinstance(step, dict)][:30]
         elif method == 'item/agentMessage/delta':
             self.track_activity({'id': params['itemId'], 'type': 'agentMessage'})
             self.state.event(self.id, 'agent_delta', item_id=params['itemId'], text=params['delta'])
@@ -194,6 +221,15 @@ class ProjectSession:
             self.state.event(self.id, 'command_delta', item_id=params['itemId'], text=params['delta'])
         elif method in ('item/started', 'item/completed'):
             item = params.get('item', {})
+            if item.get('type') == 'collabAgentToolCall':
+                with self.activity_lock:
+                    receivers = item.get('receiverThreadIds') or []
+                    states = item.get('agentsStates') or {}
+                    for agent_id in receivers:
+                        state = states.get(agent_id) or {}
+                        self.agent_work[agent_id] = {'id': agent_id, 'tool': item.get('tool'),
+                            'status': state.get('status', item.get('status', 'unknown')),
+                            'role': state.get('agentRole'), 'name': state.get('agentNickname')}
             self.track_activity(item, completed=method == 'item/completed')
             if (method == 'item/completed' and item.get('type') == 'agentMessage' and
                     '[[HARNESS:SHOW_SUMMARY]]' in item.get('text', '') and self.planning):
@@ -208,7 +244,7 @@ class ProjectSession:
             self.state.merge_info(self.id, token_usage=params['tokenUsage'])
         elif method == 'model/rerouted':
             self.state.merge_info(self.id, model=params.get('toModel'))
-            self.state.event(self.id, 'model_selected', text=f'Codex 서비스가 모델을 {params.get("toModel")}로 변경했습니다: {params.get("reason", "")}')
+            self.state.event(self.id, 'model_selected', text=_msg('py.dashboard_session.message' ,params.get('toModel'),params.get('reason', '')))
         elif method == 'error':
             self.state.event(self.id, 'error', text=params.get('error', {}).get('message', str(params)))
         elif method == 'connection/closed':
@@ -216,7 +252,7 @@ class ProjectSession:
             self.turn_id = None
             with self.activity_lock:
                 self.active_items.clear()
-            self.state.event(self.id, 'disconnected', text='Codex 연결이 종료되었습니다. 대화 연결 버튼으로 이어갈 수 있습니다.')
+            self.state.event(self.id, 'disconnected', text=_msg('py.dashboard_session.message.2'))
 
     def track_activity(self, item, *, completed=False):
         item_id = item.get('id')
@@ -245,6 +281,11 @@ class ProjectSession:
         with self.activity_lock:
             return next(reversed(self.active_items.values()), 'working')
 
+    def work_status(self):
+        with self.activity_lock:
+            return {'turn_id': self.turn_id, 'plan': list(self.task_plan), 'agents': list(self.agent_work.values()),
+                    'waiting_for_answer': bool(self.live_questions), 'connected': not self.closed}
+
     def on_request(self, message):
         params, method = message.get('params', {}), message['method']
         if params.get('threadId') and self.thread_id and params['threadId'] != self.thread_id:
@@ -257,13 +298,13 @@ class ProjectSession:
                     args = json.loads(args)
                 questions = args['questions']
                 if not isinstance(questions, list) or not 1 <= len(questions) <= 3:
-                    raise ValueError('질문은 1~3개여야 합니다.')
+                    raise ValueError(_msg('py.dashboard_session.message.3'))
                 for question in questions:
                     if not isinstance(question.get('title'), str) or not question['title'].strip():
-                        raise ValueError('질문 제목이 필요합니다.')
+                        raise ValueError(_msg('py.dashboard_session.message.4'))
                     options = question.get('options', [])
                     if options and (not 2 <= len(options) <= 4 or not all(isinstance(v, str) for v in options)):
-                        raise ValueError('선택지는 문자열 2~4개여야 합니다.')
+                        raise ValueError(_msg('py.dashboard_session.message.5'))
                 self.state.add_question(self.id, params['callId'], {'questions': questions, 'mode': 'async'})
                 output = {'accepted': True}
                 success = True
@@ -279,25 +320,25 @@ class ProjectSession:
             self.state.add_question(self.id, question_id, {'questions': questions, 'mode': 'blocking'})
         else:
             self.rpc.deny_request(message)
-            self.state.event(self.id, 'blocked', text='추가 권한 요청을 거부했습니다. 현재 프로젝트 안에서 작업해야 합니다.', method=method)
+            self.state.event(self.id, 'blocked', text=_msg('py.dashboard_session.message.6'), method=method)
 
     def answer(self, question_id, answers):
         with self.lock:
             question = next((q for q in self.state.questions(self.id) if q['id'] == question_id), None)
             if question is None:
-                raise ValueError('이미 답했거나 존재하지 않는 질문입니다.')
+                raise ValueError(_msg('ui.this.question.was.already.answered.or.no.longer'))
             if not isinstance(answers, list) or len(answers) != len(question['questions']):
-                raise ValueError('각 질문에 대한 응답이 필요합니다.')
+                raise ValueError(_msg('ui.an.answer.is.required.for.each.question'))
             if any(not isinstance(a, str) or len(a) > 10000 for a in answers):
-                raise ValueError('답변은 문자열이어야 합니다.')
+                raise ValueError(_msg('py.dashboard_session.message.7'))
             if question['mode'] == 'blocking' and question_id in self.live_questions:
                 self.rpc.respond(self.live_questions.pop(question_id), {'answers': {
                     q['key']: {'answers': [a] if a else []} for q, a in zip(question['questions'], answers)}})
                 for q, a in zip(question['questions'], answers):
-                    self.state.event(self.id, 'user', text=f'{q["title"]}\n{a or "건너뛰기"}')
+                    self.state.event(self.id, 'user', text=f'{q["title"]}\n{a or _msg('ui.skip')}')
             elif question['mode'] == 'native_async':
                 replies = [{'questionItemId': json.dumps(['request_user_input_async', question_id, i], separators=(',', ':')),
-                            'question': q['title'], 'answer': a or '건너뛰기'}
+                            'question': q['title'], 'answer': a or _msg('ui.skip')}
                            for i, (q, a) in enumerate(zip(question['questions'], answers))]
                 self.send_message('<send_user_message_question_reply>\n' +
                                   json.dumps(replies, ensure_ascii=False) + '\n</send_user_message_question_reply>')

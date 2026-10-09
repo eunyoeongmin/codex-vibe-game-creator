@@ -1,5 +1,6 @@
 """Codex app-server JSON-RPC transport. No terminal scraping or shell interpolation."""
 from __future__ import annotations
+from message_catalog import text as _msg
 from collections import deque
 from functools import lru_cache
 import json
@@ -39,7 +40,7 @@ def find_codex():
         candidates = list(npm_root.glob('**/codex.exe'))
         if candidates:
             return str(candidates[0])
-    raise FileNotFoundError('Codex를 찾을 수 없습니다. Codex 앱, CLI 또는 VS Code 확장을 설치한 뒤 다시 실행하세요.')
+    raise FileNotFoundError(_msg('ui.codex.was.not.found.run.the.launcher.to'))
 
 
 def sandbox_policy(project):
@@ -91,7 +92,7 @@ class CodexRpc:
         threading.Thread(target=self._stderr, daemon=True).start()
         try:
             self.info = self.call('initialize', {'clientInfo': {
-                'name': 'game_harness_dashboard', 'title': 'Game Harness', 'version': '0.1.0'},
+                'name': 'game_harness_dashboard', 'title': _msg('py.codex_bridge.game.harness'), 'version': '0.1.0'},
                 'capabilities': {'experimentalApi': True}}, timeout=30)
             self.send({'method': 'initialized'})
         except Exception:
@@ -101,7 +102,7 @@ class CodexRpc:
     def send(self, message):
         with self.lock:
             if self.closed or self.process.poll() is not None:
-                raise RpcError('Codex 연결이 종료되었습니다. 프로젝트를 다시 열어 연결하세요.')
+                raise RpcError(_msg('ui.codex.disconnected.reopen.the.project.to.reconnect'))
             self.process.stdin.write(json.dumps(message, ensure_ascii=False) + '\n')
             self.process.stdin.flush()
 
@@ -116,7 +117,7 @@ class CodexRpc:
             try:
                 message = result_queue.get(timeout=timeout)
             except queue.Empty:
-                raise RpcError(f'Codex 응답 시간 초과: {method}') from None
+                raise RpcError(_msg('py.codex_bridge.message' ,method)) from None
             if 'error' in message:
                 raise RpcError(message['error'].get('message', str(message['error'])))
             return message.get('result', {})
@@ -136,7 +137,7 @@ class CodexRpc:
         elif method in ('execCommandApproval', 'applyPatchApproval'):
             self.respond(message['id'], {'decision': 'denied'})
         else:
-            self.send({'id': message['id'], 'error': {'code': -32601, 'message': 'Unsupported client request'}})
+            self.send({'id': message['id'], 'error': {'code': -32601, 'message': _msg('py.codex_bridge.unsupported.client.request')}})
 
     def _reader(self):
         try:
@@ -156,11 +157,12 @@ class CodexRpc:
                 except Exception as error:
                     self.errors.append(str(error))
         finally:
+            self.closed = True
             with self.lock:
                 waiters = list(self.waiters.values())
             for waiter in waiters:
                 try:
-                    waiter.put_nowait({'error': {'message': 'Codex 프로세스가 종료되었습니다.'}})
+                    waiter.put_nowait({'error': {'message': _msg('py.codex_bridge.message.2')}})
                 except queue.Full:
                     pass
             self.on_event('connection/closed', {})

@@ -1,5 +1,6 @@
 """Separate SQLite game-work/user records with Semantica semantic search."""
 from __future__ import annotations
+from message_catalog import text as _msg
 import argparse
 from contextlib import closing, contextmanager
 from datetime import datetime, timezone
@@ -93,12 +94,12 @@ def emit(value, *, error=False):
 
 def nonempty(value, name):
     if not isinstance(value, str) or not value.strip():
-        raise ValueError(f'{name}은 비어 있지 않은 문자열이어야 합니다.')
+        raise ValueError(_msg('py.decisions.message' ,name))
     return value
 
 def choice(value, options, name):
     if value not in options:
-        raise ValueError(f'{name} 허용값: {", ".join(options)}')
+        raise ValueError(_msg('py.decisions.message.2' ,name,', '.join(options)))
 
 def find_project(start=None):
     """Use only the nearest marker above the execution directory."""
@@ -107,20 +108,20 @@ def find_project(start=None):
         marker = folder / '.project'
         if marker.exists() or marker.is_symlink():
             if not marker.is_file() or marker.resolve().parent != folder:
-                raise ValueError('유효한 프로젝트 내부 .project 마커가 필요합니다.')
+                raise ValueError(_msg('py.decisions.message.3'))
             value = json.loads(marker.read_text(encoding='utf-8-sig'))
             project_id = value.get('project_id') if isinstance(value, dict) else None
             if not isinstance(project_id, str) or not re.fullmatch(r'[A-Za-z0-9_-]+', project_id):
-                raise ValueError('.project의 project_id가 올바르지 않습니다.')
+                raise ValueError(_msg('py.decisions.message.4'))
             return folder, project_id
-    raise ValueError('.project 마커가 없어 실행을 거부합니다.')
+    raise ValueError(_msg('py.decisions.message.5'))
 
 def project_path(root, path):
     root = Path(root).resolve()
     path = Path(path).expanduser()
     resolved = (path if path.is_absolute() else root / path).resolve()
     if not resolved.is_relative_to(root):
-        raise ValueError('프로젝트 폴더 밖 경로는 사용할 수 없습니다.')
+        raise ValueError(_msg('py.decisions.message.6'))
     return resolved
 
 def input_text(args):
@@ -150,7 +151,7 @@ def database(path, kind, *, write=False, project_root=None):
     expected = project_path(root, 'data/decisions.sqlite')
     path = project_path(root, path)
     if path != expected:
-        raise ValueError('DB 경로는 프로젝트의 data/decisions.sqlite로 고정됩니다.')
+        raise ValueError(_msg('py.decisions.message.7'))
     if not path.exists() and not write:
         yield None
         return
@@ -167,13 +168,13 @@ def database(path, kind, *, write=False, project_root=None):
         c.execute('PRAGMA foreign_keys=ON')
         tables = {r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         if 'dev_decisions' in tables:
-            raise ValueError('구형 하네스 개발 기록 DB는 게임 작업 기록 DB로 사용할 수 없습니다.')
+            raise ValueError(_msg('py.decisions.message.8'))
         for table in ('work_decisions', 'user_decisions', 'user_references', 'topic_additions', 'reference_traces'):
             if table in tables and c.execute(f'SELECT 1 FROM {table} WHERE project_id<>? LIMIT 1', (project_id,)).fetchone():
-                raise ValueError('다른 프로젝트 ID의 기록이 있는 DB는 사용할 수 없습니다.')
+                raise ValueError(_msg('py.decisions.message.9'))
         if 'decisions' in tables:
             if c.execute('SELECT count(*) FROM decisions').fetchone()[0]:
-                raise ValueError('구형 기록이 있습니다. 작업/사용자 구분을 확인한 뒤 이전하거나 제거해야 합니다.')
+                raise ValueError(_msg('py.decisions.message.10'))
             if write:
                 c.execute('DROP TABLE decisions')
         if write:
@@ -230,7 +231,7 @@ def expand_user_categories(c):
             for sql in objects:
                 c.execute(sql)
             if c.execute('PRAGMA foreign_key_check(user_decisions)').fetchone():
-                raise ValueError('분류 확장 중 기존 기록의 연결을 확인할 수 없습니다.')
+                raise ValueError(_msg('py.decisions.message.11'))
     finally:
         c.execute('PRAGMA foreign_keys=ON')
 
@@ -255,26 +256,26 @@ def add_work(args):
     for name in ('decision', 'reason', 'alternatives'):
         nonempty(getattr(args, name), name)
     if len(args.reason) > 300:
-        raise ValueError('reason은 300자 이내여야 합니다.')
+        raise ValueError(_msg('py.decisions.message.12'))
     choice(args.evidence_type, EVIDENCE_TYPES, 'evidence_type')
     choice(args.source, SOURCES, 'source')
     if args.evidence_type != 'none':
         nonempty(args.evidence_ref, 'evidence_ref')
     elif args.source != 'ai_judgment':
-        raise ValueError('evidence_type=none이면 source=ai_judgment만 허용합니다.')
+        raise ValueError(_msg('py.decisions.message.13'))
     with database(args.work_db, 'work', write=True) as c, transaction(c):
         active = [dict(r) for r in c.execute("SELECT * FROM work_decisions WHERE project_id=? AND area=? AND status='active' ORDER BY created_at DESC,id DESC", (args.project_id, args.area))]
         emit({'same_area_active': active, 'project_id': args.project_id, 'area': args.area}, error=True)
         if active and not (args.supersedes or args.independent):
-            raise ValueError('같은 프로젝트·area의 active 결정이 있습니다. 위 목록을 읽고 --supersedes ID 또는 --independent를 지정하세요.')
+            raise ValueError(_msg('py.decisions.message.14'))
         if args.supersedes:
             previous = next((r for r in active if r['id'] == args.supersedes), None)
             if previous is None:
-                raise ValueError('supersedes는 같은 프로젝트·area의 active 결정 ID여야 합니다.')
+                raise ValueError(_msg('py.decisions.message.15'))
             if previous['source'] == 'user_instruction' and not (
                 args.source == 'user_instruction' and args.evidence_type == 'user' and args.evidence_ref.strip()
             ):
-                raise ValueError('사용자 지시 번복에는 source=user_instruction, evidence_type=user와 사용자의 변경 확인 발언이 필요합니다.')
+                raise ValueError(_msg('py.decisions.message.16'))
         fields = {k: getattr(args, k) for k in ('project_id', 'area', 'decision', 'reason', 'alternatives', 'evidence_type', 'evidence_ref', 'source', 'supersedes')}
         record = insert_record(c, 'work', {**fields, 'status': 'active', 'superseded_by': None})
         if args.supersedes:
@@ -287,7 +288,7 @@ def user_input(args):
     value = json.loads(raw)
     required = {'category', 'topic', 'decision', 'status', 'user_quote', 'assistant_reply', 'ai_role'}
     if not isinstance(value, dict) or not required <= value.keys() or value.keys() - required - {'supersedes', 'reference_ids'}:
-        raise ValueError('필수: category, topic, decision, status, user_quote, assistant_reply, ai_role. 선택: supersedes, reference_ids.')
+        raise ValueError(_msg('py.decisions.message.17'))
     for name in required:
         nonempty(value[name], name)
     choice(value['category'], CATEGORIES, 'category')
@@ -314,30 +315,30 @@ def add_user(args):
         if conflicts:
             emit({'same_topic_current': conflicts, 'project_id': args.project_id}, error=True)
             if value['supersedes'] not in {r['id'] for r in conflicts}:
-                raise ValueError('같은 프로젝트·category·topic의 결정이 있습니다. supersedes로 이전 기록을 지정하세요.')
+                raise ValueError(_msg('py.decisions.message.18'))
         if value['supersedes']:
             previous = c.execute('SELECT * FROM user_decisions WHERE id=? AND project_id=?', (value['supersedes'], args.project_id)).fetchone()
             if previous is None or previous['category'] != value['category']:
-                raise ValueError('supersedes는 같은 프로젝트·category의 기록이어야 합니다.')
+                raise ValueError(_msg('py.decisions.message.19'))
             if c.execute('SELECT 1 FROM user_decisions WHERE supersedes=?', (value['supersedes'],)).fetchone():
-                raise ValueError('이미 대체된 기록입니다. 현재 기록을 조회하세요.')
+                raise ValueError(_msg('py.decisions.message.20'))
             if previous['status'] == 'confirmed' and value['status'] == 'proposed':
-                raise ValueError('제안으로 confirmed 기록을 대체할 수 없습니다. 독립된 proposed 기록으로 저장하세요.')
+                raise ValueError(_msg('py.decisions.message.21'))
         if 'reference_ids' not in value:
             value['reference_ids'] = json.loads(previous['reference_ids']) if previous else []
         for reference_id in value['reference_ids']:
             if not c.execute('SELECT 1 FROM user_references WHERE id=? AND project_id=?',
                              (reference_id, args.project_id)).fetchone():
-                raise ValueError('reference_ids에는 같은 프로젝트에 저장된 레퍼런스 ID만 사용할 수 있습니다.')
+                raise ValueError(_msg('py.decisions.message.22'))
         return {'saved': insert_record(c, 'user', value)}
 
 def string_list(value, name, choices=None):
     if not isinstance(value, list) or any(not isinstance(v, str) or not v.strip() for v in value):
-        raise ValueError(f'{name}은 문자열 배열이어야 합니다.')
+        raise ValueError(_msg('py.decisions.message.23' ,name))
     if len(set(value)) != len(value):
-        raise ValueError(f'{name}에는 중복 값을 넣을 수 없습니다.')
+        raise ValueError(_msg('py.decisions.message.24' ,name))
     if choices and any(v not in choices for v in value):
-        raise ValueError(f'{name} 허용값: {", ".join(choices)}')
+        raise ValueError(_msg('py.decisions.message.2' ,name,', '.join(choices)))
     return value
 
 def decoded_record(row):
@@ -354,7 +355,7 @@ def reference_folder(project_root, project_id):
             or project_id.split('.')[0].upper() in {
                 'CON', 'PRN', 'AUX', 'NUL', *(f'COM{i}' for i in range(1, 10)),
                 *(f'LPT{i}' for i in range(1, 10))}):
-        raise ValueError('이미지 보관용 project_id는 유효한 폴더 이름이어야 합니다.')
+        raise ValueError(_msg('py.decisions.message.25'))
     root = Path(project_root).resolve()
     folder = project_path(root, Path('references') / project_id)
     return root, folder
@@ -364,7 +365,7 @@ def add_reference(args):
     value = json.loads(raw)
     required = {'kind', 'title_or_url', 'user_note', 'aspects'}
     if not isinstance(value, dict) or not required <= value.keys() or value.keys() - required - {'file_path'}:
-        raise ValueError('필수: kind, title_or_url, user_note, aspects. 선택: file_path.')
+        raise ValueError(_msg('py.decisions.message.26'))
     for name in ('kind', 'title_or_url', 'user_note'):
         nonempty(value[name], name)
     choice(value['kind'], REFERENCE_KINDS, 'kind')
@@ -373,10 +374,10 @@ def add_reference(args):
     if value.get('file_path') not in (None, ''):
         nonempty(value['file_path'], 'file_path')
         if value['kind'] != 'image':
-            raise ValueError('file_path는 이미지 파일을 보관할 때만 사용합니다.')
+            raise ValueError(_msg('py.decisions.message.27'))
         source = project_path(args.project_root, value['file_path'])
         if not source.is_file():
-            raise ValueError('file_path는 이미지 파일 경로여야 합니다.')
+            raise ValueError(_msg('py.decisions.message.28'))
         root, folder = reference_folder(args.project_root, args.project_id)
     copied = None
     try:
@@ -388,7 +389,7 @@ def add_reference(args):
                 folder.mkdir(parents=True, exist_ok=True)
                 destination = folder / (record['id'] + source.suffix)
                 if not destination.resolve().is_relative_to(root):
-                    raise ValueError('레퍼런스 보관 경로는 프로젝트 폴더 안이어야 합니다.')
+                    raise ValueError(_msg('py.decisions.message.29'))
                 with source.open('rb') as original, destination.open('xb') as saved:
                     copied = destination
                     shutil.copyfileobj(original, saved)
@@ -413,7 +414,7 @@ def reference_command(args):
             "SELECT 1 FROM sqlite_master WHERE name='user_references' AND type='table'").fetchone()
         if not exists:
             if args.command in ('show', 'set-aspects'):
-                raise ValueError('해당 레퍼런스가 없습니다.')
+                raise ValueError(_msg('py.decisions.message.30'))
             return {'records': []}
         if args.command == 'set-aspects':
             string_list(args.aspects, 'aspects', REFERENCE_ASPECTS)
@@ -421,7 +422,7 @@ def reference_command(args):
                 row = c.execute('SELECT * FROM user_references WHERE id=? AND project_id=?',
                                 (args.id, args.project_id)).fetchone()
                 if row is None:
-                    raise ValueError('해당 레퍼런스가 없습니다.')
+                    raise ValueError(_msg('py.decisions.message.30'))
                 c.execute('UPDATE user_references SET aspects=? WHERE id=? AND project_id=?',
                           (json.dumps(args.aspects), args.id, args.project_id))
                 return {'saved': {**decoded_record(row), 'aspects': args.aspects}}
@@ -430,7 +431,7 @@ def reference_command(args):
             where.append('id=?'); values.append(args.id)
         if args.command == 'search':
             nonempty(args.query, 'query')
-            search = '(instr(lower(title_or_url),lower(?)) > 0 OR instr(lower(user_note),lower(?)) > 0'
+            search = _msg('py.decisions.instr.lower.title.or.url.lower.or.instr')
             values.extend([args.query, args.query])
             from reference_trace import exists
             if exists(c, 'reference_traces'):
@@ -445,7 +446,7 @@ def reference_command(args):
             [*values, getattr(args, 'limit', 10), getattr(args, 'offset', 0)])]
         if args.command == 'show':
             if not rows:
-                raise ValueError('해당 레퍼런스가 없습니다.')
+                raise ValueError(_msg('py.decisions.message.30'))
             from reference_trace import detail
             return {'record': detail(c, args.project_id, rows[0])}
         return {'records': rows}
@@ -469,10 +470,10 @@ def read_milestones(project_root):
     path = project_path(root, 'milestones.json')
     records = json.loads(path.read_text(encoding='utf-8')) if path.exists() else []
     if not isinstance(records, list):
-        raise ValueError('milestones.json은 마일스톤 배열이어야 합니다.')
+        raise ValueError(_msg('py.decisions.message.31'))
     for record in records:
         if not isinstance(record, dict):
-            raise ValueError('마일스톤 항목은 객체여야 합니다.')
+            raise ValueError(_msg('py.decisions.message.32'))
         for key in ('id', 'title', 'done_condition'):
             nonempty(record.get(key), key)
         choice(record.get('status'), MILESTONE_STATUSES, 'status')
@@ -481,7 +482,7 @@ def read_milestones(project_root):
             if (not isinstance(progress, dict) or type(progress.get('completed')) is not int or
                     type(progress.get('total')) is not int or progress['total'] <= 0 or
                     not 0 <= progress['completed'] <= progress['total']):
-                raise ValueError('마일스톤 진행 수는 0 <= completed <= total, total >= 1이어야 합니다.')
+                raise ValueError(_msg('py.decisions.message.33'))
             nonempty(progress.get('note'), 'note')
     return records
 
@@ -505,19 +506,19 @@ def milestone_command(args):
         else:
             record = next((r for r in records if r['id'] == args.id), None)
             if record is None:
-                raise ValueError('존재하지 않는 마일스톤입니다.')
+                raise ValueError(_msg('py.decisions.message.34'))
             if args.command == 'set-progress':
                 if record['status'] != 'active':
-                    raise ValueError('active 마일스톤의 진행도만 갱신할 수 있습니다.')
+                    raise ValueError(_msg('py.decisions.message.35'))
                 if args.total <= 0 or not 0 <= args.completed <= args.total:
-                    raise ValueError('total은 1 이상, completed는 0~total 범위여야 합니다.')
+                    raise ValueError(_msg('py.decisions.message.36'))
                 record['progress'] = {'completed': args.completed, 'total': args.total,
                                       'note': nonempty(args.note, 'note'),
                                       'updated_at': datetime.now(timezone.utc).isoformat()}
             else:
                 choice(args.status, MILESTONE_STATUSES, 'status')
                 if args.status == 'active' and any(r['status'] == 'active' and r['id'] != args.id for r in records):
-                    raise ValueError('다른 마일스톤이 active입니다. active는 하나만 허용합니다.')
+                    raise ValueError(_msg('py.decisions.message.37'))
                 record['status'] = args.status
         atomic_text(path, json.dumps(records, ensure_ascii=False, indent=2) + '\n')
         return {'saved': record}
@@ -528,21 +529,21 @@ def add_topic(args):
     required = {'category', 'topic', 'description', 'user_quote', 'ai_interpretation',
                 'assistant_reply', 'reason', 'evidence_type', 'source'}
     if not isinstance(value, dict) or not required <= value.keys() or value.keys() - required - {'evidence_ref'}:
-        raise ValueError('필수: ' + ', '.join(sorted(required)) + '. 선택: evidence_ref.')
+        raise ValueError(_msg('py.decisions.message.38') + ', '.join(sorted(required)) + _msg('py.decisions.message.39'))
     for name in required:
         nonempty(value[name], name)
     choice(value['category'], CATEGORIES, 'category')
     choice(value['source'], SOURCES, 'source')
     choice(value['evidence_type'], EVIDENCE_TYPES, 'evidence_type')
     if len(value['reason']) > 300:
-        raise ValueError('reason은 300자 이내여야 합니다.')
+        raise ValueError(_msg('py.decisions.message.12'))
     if value['evidence_type'] != 'none':
         nonempty(value.get('evidence_ref'), 'evidence_ref')
     elif value['source'] != 'ai_judgment':
-        raise ValueError('evidence_type=none이면 source=ai_judgment만 허용합니다.')
+        raise ValueError(_msg('py.decisions.message.13'))
     for name in ('topic', 'description'):
         if any(ch in value[name] for ch in '\r\n|') or value[name] != value[name].strip():
-            raise ValueError(f'{name}은 앞뒤 공백·줄바꿈·표 구분자 없는 한 줄로 입력하세요.')
+            raise ValueError(_msg('py.decisions.message.40' ,name))
     catalog = project_path(args.project_root, 'catalogs/product-design-topics.md')
     added_content = f"| {value['topic']} | {value['description']} |"
     before = None
@@ -554,14 +555,14 @@ def add_topic(args):
             heading = f"## {value['category']}"
             starts = [i for i, line in enumerate(lines) if line.strip() == heading]
             if len(starts) != 1:
-                raise ValueError('topic 표에서 해당 category 섹션을 하나로 찾을 수 없습니다.')
+                raise ValueError(_msg('py.decisions.message.41'))
             start = starts[0] + 1
             end = next((i for i in range(start, len(lines)) if lines[i].startswith('## ')), len(lines))
             rows = [i for i in range(start, end) if lines[i].startswith('|')]
             if len(rows) < 2:
-                raise ValueError('category 섹션에 topic 표가 없습니다.')
+                raise ValueError(_msg('py.decisions.message.42'))
             if any(lines[i].split('|')[1].strip() == value['topic'] for i in rows):
-                raise ValueError('같은 category·topic이 이미 표에 있습니다. 기존 항목을 사용하세요.')
+                raise ValueError(_msg('py.decisions.message.43'))
             number = c.execute('SELECT coalesce(max(cast(substr(id,3) AS INTEGER)),0)+1 FROM topic_additions').fetchone()[0]
             record = {'id': f'T-{number:03d}', 'created_at': datetime.now(timezone.utc).isoformat(),
                       'project_id': args.project_id, **value, 'evidence_ref': value.get('evidence_ref'),
@@ -590,7 +591,7 @@ def topic_command(args):
     with database(args.user_db, 'user') as c:
         if c is None or not c.execute("SELECT 1 FROM sqlite_master WHERE name='topic_additions' AND type='table'").fetchone():
             if args.command == 'show':
-                raise ValueError('해당 topic 추가 기록이 없습니다.')
+                raise ValueError(_msg('py.decisions.message.44'))
             return {'records': []}
         conditions, values = ['r.project_id=?'], [args.project_id]
         if getattr(args, 'category', None):
@@ -609,7 +610,7 @@ def topic_command(args):
             [*values, getattr(args, 'limit', 10), getattr(args, 'offset', 0)])]
         if args.command == 'show':
             if not rows:
-                raise ValueError('해당 topic 추가 기록이 없습니다.')
+                raise ValueError(_msg('py.decisions.message.44'))
             return {'record': rows[0]}
         return {'records': rows}
 
@@ -633,7 +634,7 @@ def read_records(args, kind):
     with database(path, kind) as c:
         if c is None:
             if args.command in ('why', 'show'):
-                raise ValueError('해당 기록이 없습니다.')
+                raise ValueError(_msg('py.decisions.message.45'))
             return {'records': []}
         if args.command in ('why', 'show'):
             conditions.append('r.id=?'); values.append(args.id)
@@ -650,7 +651,7 @@ def read_records(args, kind):
             [*values, getattr(args, 'limit', 10), getattr(args, 'offset', 0)])]
         if args.command in ('why', 'show'):
             if not rows:
-                raise ValueError('해당 기록이 없습니다.')
+                raise ValueError(_msg('py.decisions.message.45'))
             if kind == 'user':
                 next_row = c.execute('SELECT id FROM user_decisions WHERE supersedes=?', (rows[0]['id'],)).fetchone()
                 rows[0]['superseded_by'] = next_row[0] if next_row else None
@@ -681,13 +682,13 @@ def semantic_search(c, kind, conditions, values, args):
 def bounded(value):
     number = int(value)
     if not 1 <= number <= 100:
-        raise argparse.ArgumentTypeError('limit은 1~100 범위입니다.')
+        raise argparse.ArgumentTypeError(_msg('py.decisions.message.46'))
     return number
 
 def offset_number(value):
     number = int(value)
     if number < 0:
-        raise argparse.ArgumentTypeError('offset은 0 이상이어야 합니다.')
+        raise argparse.ArgumentTypeError(_msg('py.decisions.message.47'))
     return number
 
 def pagination(p):
@@ -695,11 +696,11 @@ def pagination(p):
     p.add_argument('--offset', type=offset_number, default=0)
 
 def parser():
-    root = argparse.ArgumentParser(description='프로젝트별 작업 결정 / 사용자 결정')
+    root = argparse.ArgumentParser(description=_msg('py.decisions.message.48'))
     stores = root.add_subparsers(dest='store', required=True)
-    work = stores.add_parser('work', help='A: 게임 제작 AI의 작업 결정')
+    work = stores.add_parser('work', help=_msg('py.decisions.message.49'))
     commands = work.add_subparsers(dest='command', required=True)
-    add = commands.add_parser('add', help='A: 작업 결정 추가')
+    add = commands.add_parser('add', help=_msg('py.decisions.message.50'))
     add.add_argument('--area', required=True, choices=AREAS)
     for name in ('decision', 'reason', 'alternatives'):
         add.add_argument('--' + name, required=True)
@@ -709,23 +710,23 @@ def parser():
     conflict = add.add_mutually_exclusive_group()
     conflict.add_argument('--supersedes')
     conflict.add_argument('--independent', action='store_true')
-    pagination(commands.add_parser('recent', help='A: 최근 기록, 기본 10건'))
-    listing = commands.add_parser('list', help='A: 영역별 조회, 기본 10건')
+    pagination(commands.add_parser('recent', help=_msg('py.decisions.message.51')))
+    listing = commands.add_parser('list', help=_msg('py.decisions.message.52'))
     listing.add_argument('--area', required=True, choices=AREAS)
     listing.add_argument('--status', choices=('active', 'superseded'), default='active')
     pagination(listing)
-    why = commands.add_parser('why', help='A: 결정 근거 조회'); why.add_argument('id')
-    search = commands.add_parser('search', help='A: 키워드 검색'); search.add_argument('query')
+    why = commands.add_parser('why', help=_msg('py.decisions.message.53')); why.add_argument('id')
+    search = commands.add_parser('search', help=_msg('py.decisions.message.54')); search.add_argument('query')
     search.add_argument('--area', choices=AREAS)
     search.add_argument('--status', choices=('active', 'superseded'), default='active')
-    search.add_argument('--semantic', action='store_true', help='키워드 대신 Semantica 의미 검색')
+    search.add_argument('--semantic', action='store_true', help=_msg('py.decisions.message.55'))
     pagination(search)
-    users = stores.add_parser('user', help='B: 최종 사용자의 게임 결정')
+    users = stores.add_parser('user', help=_msg('py.decisions.message.56'))
     sub = users.add_subparsers(dest='command', required=True)
     for command in ('add', 'list', 'show', 'search'):
         p = sub.add_parser(command)
         if command == 'add':
-            p.add_argument('--input', help='UTF-8 JSON 파일; 생략하면 stdin')
+            p.add_argument('--input', help=_msg('py.decisions.message.57'))
         elif command == 'show':
             p.add_argument('id')
         else:
@@ -734,28 +735,28 @@ def parser():
             pagination(p)
             if command == 'search':
                 p.add_argument('query'); p.add_argument('--semantic', action='store_true')
-    references = stores.add_parser('reference', help='결정의 근거가 되는 레퍼런스')
+    references = stores.add_parser('reference', help=_msg('py.decisions.message.58'))
     sub = references.add_subparsers(dest='command', required=True)
     for command in ('add', 'list', 'show', 'search', 'set-aspects', 'trace-add'):
         p = sub.add_parser(command)
         if command == 'add':
-            p.add_argument('--input', help='UTF-8 JSON 파일; 생략하면 stdin')
+            p.add_argument('--input', help=_msg('py.decisions.message.57'))
         elif command in ('show', 'set-aspects', 'trace-add'):
             p.add_argument('id')
             if command == 'set-aspects':
                 p.add_argument('--aspects', nargs='*', required=True, choices=REFERENCE_ASPECTS)
             if command == 'trace-add':
-                p.add_argument('--input', help='UTF-8 JSON 파일; 생략하면 stdin')
+                p.add_argument('--input', help=_msg('py.decisions.message.57'))
         else:
             pagination(p)
             if command == 'search':
                 p.add_argument('query')
-    topics = stores.add_parser('topic', help='topic 표 추가와 근거 기록')
+    topics = stores.add_parser('topic', help=_msg('py.decisions.message.59'))
     sub = topics.add_subparsers(dest='command', required=True)
     for command in ('add', 'list', 'show', 'search'):
         p = sub.add_parser(command)
         if command == 'add':
-            p.add_argument('--input', help='UTF-8 JSON 파일; 생략하면 stdin')
+            p.add_argument('--input', help=_msg('py.decisions.message.57'))
         elif command == 'show':
             p.add_argument('id')
         else:
@@ -763,7 +764,7 @@ def parser():
             pagination(p)
             if command == 'search':
                 p.add_argument('query'); p.add_argument('--semantic', action='store_true')
-    milestones = stores.add_parser('milestone', help='제작 마일스톤')
+    milestones = stores.add_parser('milestone', help=_msg('py.decisions.message.60'))
     sub = milestones.add_subparsers(dest='command', required=True)
     add = sub.add_parser('add')
     add.add_argument('--title', required=True)
@@ -778,25 +779,98 @@ def parser():
     progress.add_argument('--total', type=int, required=True)
     progress.add_argument('--note', required=True)
     sub.add_parser('list')
-    assets = stores.add_parser('asset', help='프로젝트 에셋 관리')
+    assets = stores.add_parser('asset', help=_msg('py.decisions.message.61'))
     sub = assets.add_subparsers(dest='command', required=True)
     for name in ('add', 'update', 'list', 'show', 'history'):
         p = sub.add_parser(name)
         if name in ('update', 'show', 'history'):
             p.add_argument('id')
         if name in ('add', 'update'):
-            p.add_argument('--input', help='UTF-8 JSON 파일; 생략하면 stdin')
+            p.add_argument('--input', help=_msg('py.decisions.message.57'))
         if name == 'update':
             p.add_argument('--revision', type=int, required=True)
         if name == 'list':
             p.add_argument('--kind', choices=('image', 'sound'))
             p.add_argument('--status', choices=('temporary', 'proposed', 'confirmed', 'retired'))
             p.add_argument('--query')
+    context = stores.add_parser('context', help=_msg('py.decisions.message.62'))
+    sub = context.add_subparsers(dest='command', required=True)
+    sub.add_parser('search').add_argument('query')
+    discard = stores.add_parser('discard', help=_msg('py.decisions.message.63'))
+    sub = discard.add_subparsers(dest='command', required=True)
+    propose = sub.add_parser('propose')
+    propose.add_argument('--path', required=True)
+    propose.add_argument('--reason', required=True)
+    propose.add_argument('--record-ids', nargs='*', default=[])
+    sub.add_parser('list')
+    content = stores.add_parser('content', help=_msg('py.decisions.message.64'))
+    sub = content.add_subparsers(dest='command', required=True)
+    register = sub.add_parser('register')
+    register.add_argument('--input', required=True)
+    register.add_argument('--revision')
+    sub.add_parser('show').add_argument('id')
+    sub.add_parser('list')
+    relation = stores.add_parser('relation').add_subparsers(dest='command', required=True)
+    relation.add_parser('list')
+    relation.add_parser('show').add_argument('id')
+    relation.add_parser('add').add_argument('--input', required=True)
+    timeline = stores.add_parser('timeline').add_subparsers(dest='command', required=True)
+    timeline.add_parser('list')
+    timeline.add_parser('show').add_argument('id')
+    save = timeline.add_parser('save'); save.add_argument('--input', required=True); save.add_argument('--revision')
+    publish = timeline.add_parser('publish'); publish.add_argument('id'); publish.add_argument('--revision', required=True)
+    for kind in ('soundscape', 'balance'):
+        studio = stores.add_parser(kind).add_subparsers(dest='command', required=True)
+        studio.add_parser('list'); studio.add_parser('show').add_argument('id'); studio.add_parser('runtime')
+        save = studio.add_parser('save'); save.add_argument('--input',required=True); save.add_argument('--revision')
+        if kind == 'soundscape':
+            publish = studio.add_parser('publish'); publish.add_argument('id'); publish.add_argument('--revision',required=True)
+    live = stores.add_parser('live').add_subparsers(dest='command', required=True)
+    for name in ('runtime', 'graph', 'points'): live.add_parser(name)
+    live.add_parser('point').add_argument('id')
+    p = live.add_parser('register'); p.add_argument('--input', required=True); p.add_argument('--revision')
+    gameplay = stores.add_parser('gameplay').add_subparsers(dest='command', required=True)
+    gameplay.add_parser('runtime')
+    for name in ('save', 'list', 'show', 'applied'):
+        p = gameplay.add_parser(name)
+        p.add_argument('kind', choices=('play_save', 'localization', 'experiment', 'integration', 'content_plan'))
+        if name in ('save', 'applied'):
+            p.add_argument('--input', required=True); p.add_argument('--revision')
+        if name == 'show': p.add_argument('id')
+    for name in ('story', 'feedback', 'variant'):
+        sub = stores.add_parser(name).add_subparsers(dest='command', required=True)
+        sub.add_parser('list')
+        sub.add_parser('show').add_argument('id')
+        if name == 'story':
+            save = sub.add_parser('save')
+            save.add_argument('--input', required=True)
+            save.add_argument('--revision')
     return root
 
 def run(args):
     args.project_root, args.project_id = find_project()
     args.user_db = args.work_db = project_path(args.project_root, 'data/decisions.sqlite')
+    if args.store == 'live':
+        from live_tools import command
+        return command(args)
+    if args.store in ('soundscape','balance'):
+        from studio_tools import command
+        return command(args)
+    if args.store == 'gameplay':
+        from gameplay_tools import command
+        return command(args)
+    if args.store in ('relation', 'timeline'):
+        from production_tools import command
+        return command(args)
+    if args.store == 'content':
+        from content_editor import command
+        return command(args)
+    if args.store in ('story', 'feedback', 'variant'):
+        from creator_tools import command
+        return command(args)
+    if args.store in ('context', 'discard'):
+        from project_workbench import command
+        return command(args)
     if args.store == 'asset':
         from asset_store import command
         return command(args)

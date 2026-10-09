@@ -1,26 +1,18 @@
 'use strict';
-// Only explicit UI strings and the initial static markup use this catalog.
-// Conversation text, filenames, decision values and editor contents stay untouched.
+// Bind only explicit interface text. User content is never translated implicitly.
 const I18n = {
-  locale: 'ko', catalog: {}, bindings: [],
+  locale: 'ko', bindings: [],
   normalize(value) {
     const code = String(value || '').toLowerCase();
     if (code.startsWith('zh')) return /hant|tw|hk|mo/.test(code) ? 'zh-Hant' : 'zh-Hans';
     return ['ko', 'en', 'ja'].find(v => code.startsWith(v)) || 'en';
   },
   async load() {
-    const response = await fetch('/locales.json');
-    if (!response.ok) throw new Error('Cannot load interface translations.');
-    this.catalog = await response.json();
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    while (walker.nextNode()) {
-      const node = walker.currentNode, original = node.textContent;
-      if (this.catalog[original.trim()]) this.bindings.push({node, original});
-    }
-    for (const node of document.querySelectorAll('[placeholder], [aria-label], [title]')) {
+    for (const node of document.querySelectorAll('[data-message], [data-message-placeholder], [data-message-aria-label], [data-message-title]')) {
+      if (node.dataset.message) this.bindings.push({node, key: node.dataset.message, last: node.textContent});
       for (const attr of ['placeholder', 'aria-label', 'title']) {
-        const original = node.getAttribute(attr);
-        if (this.catalog[original]) this.bindings.push({node, attr, original});
+        const key = node.getAttribute('data-message-' + attr);
+        if (key) this.bindings.push({node, attr, key});
       }
     }
   },
@@ -28,15 +20,14 @@ const I18n = {
     this.locale = this.normalize(language);
     document.documentElement.lang = this.locale;
     document.getElementById('language').value = this.locale;
-    for (const {node, attr, original} of this.bindings) {
+    for (const binding of this.bindings) {
+      const {node, attr, key} = binding;
       if (!node.isConnected) continue;
-      if (attr) node.setAttribute(attr, t(original));
-      else node.textContent = original.replace(original.trim(), t(original.trim()));
+      if (attr) node.setAttribute(attr, t(key));
+      else if (!binding.replaced && node.textContent === binding.last) {
+        node.textContent = binding.last = t(key);
+      } else binding.replaced = true; // A renderer now owns this title or status.
     }
   }
 };
-function t(key, ...args) {
-  if (typeof key !== 'string') return key;
-  const translated = I18n.catalog[key]?.[I18n.locale] || key;
-  return translated.replace(/\{(\d+)\}/g, (match, index) => index < args.length ? String(args[index]) : match);
-}
+function t(key, ...args) { return HarnessText.text(key, I18n.locale, ...args); }

@@ -6,7 +6,7 @@ Use Python 3.12 on Windows x64. `start.bat` prepares the shared runtime, then op
 
 AI-facing dashboard instructions live in `instructions/dashboard.toml`. Increment its version whenever changing the instructions. Connections pin the instruction snapshot; new connections load the changed file. Delivery records include the source hash and exact rendered text. Project instructions live in `template/`.
 
-Interface translations live in `web/locales.json`; the Korean keys are source strings and each entry has `en`, `ja`, `zh-Hans` and `zh-Hant`. Only explicit interface text is translated. Never translate saved user quotes or decisions in place. Locale metadata in a SPEC snapshot keeps existing versions stable when the display language changes.
+Interface text, server errors, CLI help, bootstrap messages and game-runtime messages live in `messages/catalog.json`. Code uses stable message IDs; each entry keeps `source`, `ko` and the existing `en`, `ja`, `zh-Hans`, `zh-Hant` translations. Use `message_catalog.text()` in Python, `t()` for translated UI, and `HarnessText.raw()` for source-valued labels. Add or change wording only in the catalog; do not put fallback sentences in code. AI instructions and legacy guide migrations remain in `instructions/dashboard.toml`. New projects receive a local catalog; exported runtimes embed only the keys they use. Only explicit interface text is translated. Never translate saved user quotes or decisions in place. Locale metadata in a SPEC snapshot keeps existing versions stable when the display language changes.
 
 ## Build a release
 

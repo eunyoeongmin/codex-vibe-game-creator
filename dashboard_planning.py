@@ -1,4 +1,5 @@
 """DB-derived planning cards and versioned, user-approved specifications."""
+from message_catalog import text as _msg
 from contextlib import closing
 from datetime import datetime, timezone
 import hashlib
@@ -10,9 +11,9 @@ import decisions
 from localization import translate
 
 LABELS = dict(zip(decisions.CATEGORIES, (
-    '장르', '시점', '화풍', '분위기·세계관', '핵심 루프', '플랫폼·입력',
-    '범위·분량', '기술 스택', 'UI', '색감', '제작 목적·기타')))
-START_QUOTE = '요약 화면에서 이대로 시작 선택'
+    _msg('ui.genre'), _msg('ui.camera'), _msg('ui.art.style'), _msg('ui.mood.and.world'), _msg('ui.core.loop'), _msg('ui.platform.and.controls'),
+    _msg('ui.scope.and.content'), _msg('ui.technology'), 'UI', _msg('ui.color.palette'), _msg('ui.purpose.and.other'))))
+START_QUOTE = _msg('ui.selected.start.with.this.on.the.summary.screen')
 SPEC_SCHEMA = '''CREATE TABLE IF NOT EXISTS harness_specs (
     version INTEGER PRIMARY KEY, created_at TEXT NOT NULL,
     confirmed_hash TEXT NOT NULL, snapshot TEXT NOT NULL,
@@ -51,14 +52,14 @@ def confirmed_hash(records):
 def spec_text(snapshot):
     language = snapshot.get('language', 'ko')
     tr = lambda text, *values: translate(text, language, *values)
-    lines = ['# SPEC', '', tr('버전: {0}', snapshot['version']),
-             tr('시각: {0}', snapshot['created_at']), tr('프로젝트: {0}', snapshot['project_id']), '']
+    lines = ['# SPEC', '', tr(_msg('ui.version'), snapshot['version']),
+             tr(_msg('ui.time'), snapshot['created_at']), tr(_msg('ui.project'), snapshot['project_id']), '']
     for category in snapshot['categories']:
         lines.extend([f'## {tr(category["label"])}', ''])
         if not category['items']:
-            lines.append('- ' + tr('미결정'))
+            lines.append('- ' + tr(_msg('ui.undecided')))
         for item in category['items']:
-            label = tr('확정' if item['status'] == 'confirmed' else '제안')
+            label = tr(_msg('ui.confirmed') if item['status'] == 'confirmed' else _msg('ui.proposed'))
             text = item['decision'].replace('\n', '\n  ')
             lines.append(f'- [{label}] {item["topic"]}: {text} '
                          f'({item["id"]}, {item["created_at"]})')
@@ -153,7 +154,7 @@ class Planning:
         with self.state.lock:
             result = self.progress(pid)
             if result['fingerprint'] != fingerprint:
-                raise ValueError('결정 기록이 변경되었습니다. 갱신된 요약을 확인하세요.')
+                raise ValueError(_msg('ui.decisions.changed.review.the.updated.summary'))
             self.state.merge_info(pid, planning={'open': False, 'checkpoint': result['confirmed_count'] // 10})
             return self.progress(pid)
 
@@ -167,20 +168,19 @@ class Planning:
                 latest = self.latest(c)
                 if latest:
                     if latest['delivered']:
-                        raise ValueError('이미 개발 시작을 승인한 프로젝트입니다.')
+                        raise ValueError(_msg('ui.development.has.already.been.approved.for.this.project'))
                 else:
                     records = current_records(c, pid)
                     if digest(records) != fingerprint:
-                        raise ValueError('결정 기록이 변경되었습니다. 갱신된 요약을 확인하세요.')
+                        raise ValueError(_msg('ui.decisions.changed.review.the.updated.summary'))
                     if not records:
-                        raise ValueError('저장된 결정이 없습니다.')
+                        raise ValueError(_msg('ui.there.are.no.saved.decisions'))
                     for proposal in (r for r in records if r['status'] == 'proposed'):
                         # A single supersedes link cannot safely retire two conflicting records.
                         others = [r for r in records if r['id'] != proposal['id'] and
                                   (r['category'], r['topic']) == (proposal['category'], proposal['topic'])]
                         if others:
-                            raise ValueError(f'{proposal["category"]} / {proposal["topic"]}: '
-                                             '기존 결정과 제안이 겹칩니다. 번복 기록을 먼저 정리하세요.')
+                            raise ValueError(_msg('py.dashboard_planning.message' ,proposal['category'],proposal['topic']))
                         record = {**proposal, 'id': decisions.next_id(c, 'user'),
                                   'created_at': datetime.now(timezone.utc).isoformat(),
                                   'status': 'confirmed', 'user_quote': translate(START_QUOTE, self.state.setting('language', 'ko')),

@@ -17,7 +17,27 @@ An independent community project. Not an official OpenAI product.
 
 Later, use the **Codex Vibe Game Creator** desktop shortcut. Keep the launcher/server window open while working; closing it stops the local server. The release ZIP is an alternative: extract it and run `start.bat`.
 
+Play tools include versioned game saves and play points, a game-string translation editor, controlled playable comparisons, system-connection plans and per-content progression tables. Saves require a game-specific capture/restore adapter; AI connection requests wire it to the current game. Older save originals are preserved during migration. Localization edits actual registered JSON catalogs, checks missing translations and variables, and reports overflow for visible marked DOM strings only. Design proposals, user selections and implementation evidence stay distinct; selected designs link to user decisions and implemented changes to work decisions. These tools do not automatically judge fun or user satisfaction.
+
+Sound direction adds event-linked music, effects, ambience and voice with looping, fades, overlap limits, priorities and music ducking. Audition registered assets and request integration with actual game events. Game balance compares user-selected inputs and target ranges through registered functions from the game, preserving calculation evidence and results. Comparisons do not change game values; apply changes through an explicit adjustment request.
+
+## Creation tools
+
+The right-hand **Creation tools** tab includes:
+
+- **Content editor:** ask AI to register the game's actual JSON/CSV data, then edit individual rows or request a targeted change. IDs stay fixed; field types, ranges and references are checked.
+- **Play feedback:** capture a selected screen or attach an image, save a note, then send it to AI. Game state is optional and requires the game's `GameCreatorFeedback()` hook. Capture and state timestamps remain separate.
+- **Checkpoints:** save game files and records; restoring first preserves the current version. Conversation history and the shared runtime are not rewound.
+- **Alternatives:** copy a playable version, request changes to that copy, run both versions side by side and choose one. Adoption is refused if the original has changed in the meantime.
+- **Story workspace:** keep characters, events, branches, conditions and game effects separate. AI saves proposals; the user confirms versions. Story confirmation does not automatically change game code.
+- **Export game:** choose the HTML entry point and download a game ZIP with launch instructions. For engine projects, build web output first. Files outside the selected HTML folder and remote services are not bundled.
+
+
+Mark regions on a captured still image to request precise changes and compare before/after images. Data relationships show registered links and their evidence separately from text matches in code. Sequence timelines support dialogue, movement, images, sound, transitions and waits; edit their order and timing, preview them in the game, and publish reusable runtime/data files. Canvas and engine objects require an adapter through the integration request. Capturing a still image does not pause the running game.
+
 ## From idea to game
+
+In the preview, **Create while playing** opens the game beside its editing controls. Ask AI to connect the game's real targets and state once; then select a target, record actions, save a point, and request an edit or create an alternative. Compare both versions from the saved state before adopting. **System map** shows system and stage/event/reward/unlock links, with separate design, code evidence and observed execution. Existing games need these adapters connected; arbitrary game state is not inferred automatically.
 
 - **Plan through conversation.** The assistant helps with genre, core loop, controls, visual direction and a concrete content scope. Questions appear as selectable cards with a free-text answer option.
 - **Keep the reasoning.** User decisions, AI work choices and references are recorded separately. Original messages remain intact.

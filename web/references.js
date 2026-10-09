@@ -1,7 +1,7 @@
 /* Reference provenance is read from the DB, never inferred from chat text. */
 function referenceDetails(record) {
   const details = element('details', 'reference-details');
-  details.append(element('summary', '', t('조사·해석·적용 보기')));
+  details.append(element('summary', '', t("ui.research.interpretation.and.use")));
   const content = element('div', 'reference-trace');
   details.append(content);
   let loading = false, loaded = false;
@@ -9,7 +9,7 @@ function referenceDetails(record) {
     if (!details.open || loading || loaded || !current) return;
     loading = true;
     const projectId = current.id, version = viewVersion;
-    content.replaceChildren(element('p', 'muted', t('불러오는 중…')));
+    content.replaceChildren(element('p', 'muted', t("ui.loading")));
     try {
       const data = await api(`projects/${projectId}/reference?id=${encodeURIComponent(record.id)}`);
       if (version !== viewVersion || current?.id !== projectId) return;
@@ -17,7 +17,7 @@ function referenceDetails(record) {
       loaded = true;
     } catch (error) {
       content.replaceChildren(element('p', 'muted', error.message));
-      content.append(button(t('다시 시도'), load));
+      content.append(button(t("ui.retry"), load));
     } finally { loading = false; }
   }
   details.addEventListener('toggle', () => { if (details.open) load(); });
@@ -36,7 +36,7 @@ function renderReferenceTrace(container, record, projectId) {
     const row = element('div', 'reference-file');
     row.append(element('span', '', path + (location ? ` · ${location}` : '')));
     if (/\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(path)) {
-      row.append(button(t('이미지 보기'), () => run(async () => {
+      row.append(button(t("ui.view.image"), () => run(async () => {
         const result = await api(`projects/${projectId}/image?path=${encodeURIComponent(path)}`);
         if (current?.id !== projectId || !row.isConnected) return;
         row.querySelector('img')?.remove();
@@ -45,7 +45,7 @@ function renderReferenceTrace(container, record, projectId) {
         row.append(img);
       })));
     } else {
-      row.append(button(t('파일 보기'), () => run(async () => {
+      row.append(button(t("ui.view.file"), () => run(async () => {
         if (current?.id !== projectId) return;
         document.querySelector('[data-tab="files"]').click();
         await readFile(path);
@@ -56,7 +56,7 @@ function renderReferenceTrace(container, record, projectId) {
   function source(parent, value) {
     if (/^https?:\/\//i.test(value)) {
       const a = element('a', '', value);
-      a.href = value; a.target = '_blank'; a.rel = 'noopener noreferrer'; parent.append(a);
+      a.href = value; a.target = '_blank'; a.rel = HarnessText.raw("js.creator.noopener.noreferrer"); parent.append(a);
     } else if (value) file(parent, value);
   }
   function links(parent, label, ids) {
@@ -72,73 +72,73 @@ function renderReferenceTrace(container, record, projectId) {
     }));
     parent.append(row);
   }
-  field(container, t('사용자 원문'), record.user_note);
-  field(container, t('참고 요소'), record.aspects.join(' · '));
+  field(container, t("ui.original.user.statement"), record.user_note);
+  field(container, t("ui.selected.aspects"), record.aspects.join(' · '));
   if (record.file_path) file(container, record.file_path);
-  const stageNames = {research: t('조사 근거'), interpretation: t('참고 해석'), application: t('적용 연결')};
-  const stateNames = {planned: t('적용 예정'), applied: t('적용 기록'), dropped: t('채택하지 않음')};
+  const stageNames = {research: t("ui.research.evidence"), interpretation: t("ui.reference.interpretation"), application: t("ui.application.links")};
+  const stateNames = {planned: t("ui.planned"), applied: t("ui.recorded.application"), dropped: t("ui.not.adopted")};
   const trace = record.trace || [];
   function entry(row) {
     const card = element('article', 'reference-entry'); card.tabIndex = -1; card.dataset.traceId = row.id;
     card.append(element('h4', '', `${row.id} · ${row.topic}`), element('small', 'muted', new Date(row.created_at).toLocaleString(I18n.locale)));
-    if (row.superseded_by) field(card, t('대체한 기록'), row.superseded_by);
-    if (row.outdated_basis) card.append(element('p', 'reference-review', t('근거가 변경됨 · 적용 재검토 필요')));
+    if (row.superseded_by) field(card, t("ui.superseded.by"), row.superseded_by);
+    if (row.outdated_basis) card.append(element('p', 'reference-review', t("ui.basis.changed.review.application")));
     const p = row.payload;
     if (row.stage === 'research') {
       source(card, p.source);
-      field(card, t('근거 위치'), p.locator);
-      field(card, t('관찰 내용'), p.observation);
-      field(card, t('확인하지 못한 부분'), p.limitations);
+      field(card, t("ui.evidence.location"), p.locator);
+      field(card, t("ui.observed.facts"), p.observation);
+      field(card, t("ui.not.established"), p.limitations);
     } else if (row.stage === 'interpretation') {
-      links(card, t('조사 근거'), p.research_ids);
-      field(card, t('AI 해석'), p.meaning);
+      links(card, t("ui.research.evidence"), p.research_ids);
+      field(card, t("ui.ai.interpretation"), p.meaning);
     } else {
-      links(card, t('참고 해석'), p.interpretation_ids);
-      field(card, t('적용 상태'), stateNames[p.state]);
-      field(card, t('적용 설계'), p.plan);
-      field(card, t('원본·설계와의 차이'), p.differences);
+      links(card, t("ui.reference.interpretation"), p.interpretation_ids);
+      field(card, t("ui.usage.state"), stateNames[p.state]);
+      field(card, t("ui.application.design"), p.plan);
+      field(card, t("ui.differences.from.source.or.plan"), p.differences);
       for (const f of p.files) file(card, f.path, f.location);
-      field(card, t('연결된 결정'), p.decision_ids.join(' · '));
-      field(card, t('연결된 에셋'), p.asset_ids.join(' · '));
-      if (p.asset_versions && Object.keys(p.asset_versions).length) field(card, t('에셋 기록 버전'),
+      field(card, t("ui.linked.decisions"), p.decision_ids.join(' · '));
+      field(card, t("ui.linked.assets"), p.asset_ids.join(' · '));
+      if (p.asset_versions && Object.keys(p.asset_versions).length) field(card, t("ui.recorded.asset.versions"),
         Object.entries(p.asset_versions).map(([id, revision]) => `${id} · v${revision}`).join(' / '));
     }
-    field(card, t('선택·변경 이유'), row.reason);
-    const quote = element('details'); quote.append(element('summary', '', t('원문과 근거 보기')));
-    field(quote, t('사용자 원문'), row.user_quote);
-    field(quote, t('AI 답변 원문'), row.assistant_reply);
+    field(card, t("ui.selection.or.change.reason"), row.reason);
+    const quote = element('details'); quote.append(element('summary', '', t("ui.view.original.text.and.reasoning")));
+    field(quote, t("ui.original.user.statement"), row.user_quote);
+    field(quote, t("ui.original.ai.response"), row.assistant_reply);
     card.append(quote);
     return card;
   }
   for (const [stage, name] of Object.entries(stageNames)) {
     container.append(element('h3', '', name));
     const rows = trace.filter(r => r.stage === stage && !r.superseded_by);
-    if (!rows.length) container.append(element('p', 'muted', t('아직 기록되지 않았습니다.')));
+    if (!rows.length) container.append(element('p', 'muted', t("ui.not.recorded.yet")));
     for (const row of rows) container.append(entry(row));
   }
   const past = trace.filter(r => r.superseded_by);
   if (past.length) {
-    const history = element('details'); history.append(element('summary', '', t('이전 기록과 변경 이력')));
+    const history = element('details'); history.append(element('summary', '', t("ui.previous.records.and.changes")));
     for (const row of past) history.append(entry(row));
     container.append(history);
   }
-  container.append(element('h3', '', t('연결된 결정·에셋')));
-  if (!record.linked_decisions.length && !record.linked_assets.length) container.append(element('p', 'muted', t('아직 기록되지 않았습니다.')));
+  container.append(element('h3', '', t("ui.linked.decisions.and.assets")));
+  if (!record.linked_decisions.length && !record.linked_assets.length) container.append(element('p', 'muted', t("ui.not.recorded.yet")));
   for (const decision of record.linked_decisions) {
     const card = element('details', 'reference-entry');
     card.append(element('summary', '', `${decision.id} · ${decision.topic || decision.area} · ${decision.decision}`));
-    field(card, t('상태'), decision.status);
-    field(card, t('대체한 기록'), decision.superseded_by);
-    field(card, t('사용자 원문'), decision.user_quote);
-    field(card, t('AI 답변 원문'), decision.assistant_reply);
-    field(card, t('선택·변경 이유'), decision.reason);
+    field(card, t("ui.status"), decision.status);
+    field(card, t("ui.superseded.by"), decision.superseded_by);
+    field(card, t("ui.original.user.statement"), decision.user_quote);
+    field(card, t("ui.original.ai.response"), decision.assistant_reply);
+    field(card, t("ui.selection.or.change.reason"), decision.reason);
     container.append(card);
   }
   for (const asset of record.linked_assets) {
     const card = element('details', 'reference-entry');
     card.append(element('summary', '', `${asset.id} · v${asset.revision} · ${asset.name}`));
-    field(card, t('상태'), asset.status);
-    field(card, t('사용 상황·용도'), asset.usage);
+    field(card, t("ui.status"), asset.status);
+    field(card, t("ui.where.and.when.it.is.used"), asset.usage);
     for (const path of asset.files) file(card, path);
     container.append(card);
   }

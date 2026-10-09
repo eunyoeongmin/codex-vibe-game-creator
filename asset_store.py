@@ -1,4 +1,5 @@
 """Project-scoped asset inventory and revision history shared by CLI and dashboard."""
+from message_catalog import text as _msg
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import json
@@ -30,7 +31,7 @@ class AssetStore:
         import decisions
         self.root, self.pid = decisions.find_project(project)
         if self.root != Path(project).resolve():
-            raise ValueError('에셋 저장소는 프로젝트 루트에서 열어야 합니다.')
+            raise ValueError(_msg('py.asset_store.message'))
         self.path = decisions.project_path(self.root, 'data/decisions.sqlite')
 
     @contextmanager
@@ -54,7 +55,7 @@ class AssetStore:
                 return self.get(asset_id, connection)
         row = c.execute('SELECT * FROM assets WHERE id=? AND project_id=?', (asset_id, self.pid)).fetchone()
         if row is None:
-            raise ValueError('에셋을 찾을 수 없습니다.')
+            raise ValueError(_msg('ui.asset.not.found'))
         return self.decode(row)
 
     def list(self, *, kind=None, status=None, query=None):
@@ -88,14 +89,14 @@ class AssetStore:
         import decisions
         # Accept only portable project-relative paths, including for code-generated art.
         if not isinstance(path, str) or not path or path.startswith(('/', '\\')) or ':' in path or '..' in path.replace('\\', '/').split('/'):
-            raise ValueError('에셋 파일은 프로젝트 내부 상대 경로로 지정하세요.')
+            raise ValueError(_msg('ui.use.a.project.relative.path.for.asset.files'))
         result = decisions.project_path(self.root, path)
         return result
 
     def validate(self, values, c, previous, actor):
         import decisions
         if not isinstance(values, dict) or values.keys() - FIELDS:
-            raise ValueError('에셋 필드가 올바르지 않습니다.')
+            raise ValueError(_msg('py.asset_store.message.2'))
         defaults = {'group': '', 'usage_state': 'planned', 'status': 'temporary', 'methods': [], 'files': [],
                     'art_notes': '', 'source_note': '', 'replacement_plan': '', 'decision_ids': [],
                     'reference_ids': [], 'approval_quote': ''}
@@ -106,29 +107,29 @@ class AssetStore:
         decisions.choice(value['status'], STATUSES, 'status')
         decisions.choice(value['usage_state'], USAGE_STATES, 'usage_state')
         if value['status'] == 'retired' and value['usage_state'] != 'unused':
-            raise ValueError('사용 종료 에셋은 적용 상태를 미사용으로 지정하세요.')
+            raise ValueError(_msg('ui.set.retired.assets.to.unused'))
         for field in ('group', 'art_notes', 'source_note', 'replacement_plan', 'approval_quote'):
             if not isinstance(value[field], str):
-                raise ValueError(f'{field}: 문자열이 필요합니다.')
+                raise ValueError(_msg('py.asset_store.message.3' ,field))
         for field in ('methods', 'files', 'decision_ids', 'reference_ids'):
             decisions.string_list(value[field], field)
             if len(set(value[field])) != len(value[field]):
-                raise ValueError(f'{field}: 중복 항목은 사용할 수 없습니다.')
+                raise ValueError(_msg('py.asset_store.message.4' ,field))
         if not value['methods']:
-            raise ValueError('제작 방식을 하나 이상 선택하세요.')
+            raise ValueError(_msg('ui.select.at.least.one.creation.method'))
         for method in value['methods']:
             decisions.choice(method, METHODS, 'methods')
         for path in value['files']:
             if not self.file(path).is_file():
-                raise ValueError('등록할 에셋 파일이 프로젝트 안에 없습니다.')
+                raise ValueError(_msg('ui.the.asset.file.does.not.exist.in.this'))
         if value['usage_state'] == 'in_use' and not value['files']:
-            raise ValueError('사용 중인 에셋에는 파일 또는 구현 코드 경로가 필요합니다.')
+            raise ValueError(_msg('ui.an.asset.in.use.needs.a.file.or'))
         if value['status'] == 'temporary':
             decisions.nonempty(value['replacement_plan'], 'replacement_plan')
         for field, table in (('decision_ids', 'user_decisions'), ('reference_ids', 'user_references')):
             for record_id in value[field]:
                 if not c.execute(f'SELECT 1 FROM {table} WHERE id=? AND project_id=?', (record_id, self.pid)).fetchone():
-                    raise ValueError('같은 프로젝트의 결정·레퍼런스만 연결할 수 있습니다.')
+                    raise ValueError(_msg('ui.only.decisions.and.references.from.this.project.can'))
         changed_art = previous is None or any(value[k] != previous[k] for k in
             ('files', 'methods', 'art_notes', 'decision_ids', 'reference_ids'))
         needs_approval = value['status'] == 'confirmed' and (not previous or previous['status'] != 'confirmed' or changed_art)
@@ -149,7 +150,7 @@ class AssetStore:
             try:
                 previous = self.get(asset_id, c) if asset_id else None
                 if previous and (type(expected_revision) is not int or expected_revision != previous['revision']):
-                    raise ValueError('에셋이 변경되었습니다. 새로고침 후 다시 저장하세요.')
+                    raise ValueError(_msg('ui.this.asset.has.changed.refresh.before.saving.again'))
                 payload = self.validate(values, c, previous, actor)
                 now = datetime.now(timezone.utc).isoformat()
                 if not asset_id:
@@ -180,6 +181,6 @@ def command(args):
         return {'history': store.history(args.id)}
     value = json.loads(decisions.input_text(args))
     if not isinstance(value, dict):
-        raise ValueError('JSON 객체가 필요합니다.')
+        raise ValueError(_msg('py.asset_store.message.5'))
     note = value.pop('change_note', None)
     return store.save(value, asset_id=getattr(args, 'id', None), expected_revision=getattr(args, 'revision', None), change_note=note)
