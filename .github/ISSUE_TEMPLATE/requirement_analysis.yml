@@ -1,0 +1,48 @@
+name: 要件定義
+description: GitHub Copilot Coding Agent向けタスク — 要件定義
+labels: ["copilot", "Requirement Analysis"]
+body:
+  - type: input
+    id: target_branch
+    attributes:
+      label: 対象ブランチ
+      description: このタスクを適用するブランチを指定してください。
+      placeholder: "main"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: bsw_name
+    attributes:
+      label: BSW名
+      description: 使用するBSW製品を選択してください。必要なモジュールは入力資料から自動的に特定されます。
+      options:
+        - MICROSAR
+        - AUBIST
+    validations:
+      required: true
+
+  - type: input
+    id: bsw_package
+    attributes:
+      label: BSWパッケージ
+      description: 使用するBSWパッケージ名を入力してください。
+      placeholder: "2024_008_OEMVECTOR_MSR_TC3xx_GHS"
+    validations:
+      required: true
+
+  - type: textarea
+    id: task
+    attributes:
+      label: タスクの説明
+      description: Copilotに何を実行させますか？
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 受け入れ条件
+      description: 完了条件
+    validations:
+      required: false
