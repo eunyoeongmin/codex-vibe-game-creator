@@ -1,48 +1,81 @@
-name: 要件定義
-description: GitHub Copilot Coding Agent向けタスク — 要件定義
-labels: ["copilot", "Requirement Analysis"]
+name: 오늘 저녁밥 추천 테스트
+description: test-agent와 등록된 Agent Skill test-skill로 저녁 메뉴 추천 과정을 테스트합니다.
+title: "[저녁밥 테스트] 오늘 저녁 메뉴 추천"
+labels: ["copilot"]
 body:
-  - type: input
-    id: target_branch
+  - type: markdown
     attributes:
-      label: 対象ブランチ
-      description: このタスクを適用するブランチを指定してください。
-      placeholder: "main"
-    validations:
-      required: true
-
-  - type: dropdown
-    id: bsw_name
-    attributes:
-      label: BSW名
-      description: 使用するBSW製品を選択してください。必要なモジュールは入力資料から自動的に特定されます。
-      options:
-        - MICROSAR
-        - AUBIST
-    validations:
-      required: true
-
-  - type: input
-    id: bsw_package
-    attributes:
-      label: BSWパッケージ
-      description: 使用するBSWパッケージ名を入力してください。
-      placeholder: "2024_008_OEMVECTOR_MSR_TC3xx_GHS"
-    validations:
-      required: true
-
+      value: |
+        이슈를 생성한 뒤 Copilot에 작업을 맡길 때 test-agent를 선택하세요.
+        등록된 Agent Skill test-skill을 사용합니다 (.github/skills/test-skill/SKILL.md).
+        이 양식이나 copilot 라벨만으로 에이전트가 실행되지는 않습니다.
   - type: textarea
     id: task
     attributes:
-      label: タスクの説明
-      description: Copilotに何を実行させますか？
+      label: 테스트 실행 요청
+      description: 이 요청은 생성된 이슈 본문에 포함됩니다.
+      value: |
+        test-agent로 이 이슈의 오늘 저녁 메뉴 추천 테스트를 수행하세요.
+        등록된 Agent Skill test-skill을 사용해 아래 식사 조건에 맞게 추천하세요.
+        스킬 선택·로드 기능을 사용하고, 일반 파일 읽기로 스킬 사용을 대체하지 마세요.
+        스킬을 사용할 수 없으면 이유를 보고하고 종료하세요.
+        저장소 파일을 수정하지 말고 결과를 실행 답변으로 반환하세요.
     validations:
       required: true
-
+  - type: input
+    id: people
+    attributes:
+      label: 식사 인원
+      placeholder: "예: 성인 1명"
+    validations:
+      required: true
+  - type: input
+    id: budget
+    attributes:
+      label: 총예산
+      placeholder: "예: 전체 15,000원 이내"
+    validations:
+      required: true
+  - type: dropdown
+    id: meal_method
+    attributes:
+      label: 식사 방식
+      options:
+        - 집에서 요리
+        - 배달 또는 포장
+        - 외식
+        - 상관없음
+    validations:
+      required: true
+  - type: textarea
+    id: preferences
+    attributes:
+      label: 취향과 제한 사항
+      description: 좋아하는 음식, 못 먹는 음식, 알레르기, 매운맛 선호를 적어주세요. 없으면 '없음'을 입력하세요.
+      placeholder: "예: 한식 선호, 매운 음식 제외, 땅콩 알레르기"
+    validations:
+      required: true
+  - type: textarea
+    id: available_context
+    attributes:
+      label: 추가 조건
+      description: 집에 있는 재료, 조리 가능 시간, 외식 지역 등 필요한 조건을 적어주세요.
+      placeholder: "예: 계란과 밥이 있고, 20분 안에 준비하고 싶음"
+    validations:
+      required: false
   - type: textarea
     id: acceptance
     attributes:
-      label: 受け入れ条件
-      description: 完了条件
+      label: 완료 조건
+      description: 실행 결과와 Copilot의 호출 로그로 확인할 테스트 기준입니다.
+      value: |
+        - 첫 답변이 "안녕하세요! 저녁밥 추천 테스트 에이전트입니다."로 시작합니다.
+        - 등록된 test-skill을 사용한 뒤 "지금 저녁밥 추천 스킬을 작동중입니다"를 출력합니다.
+        - 스킬 호출 또는 로드 여부는 호스트 실행 로그로 확인합니다. 문구만으로 성공 판정하지 않습니다.
+        - 입력 조건에 맞는 메뉴 후보 3개와 최종 추천 1개를 제시합니다.
+        - 조건상 후보 3개가 불가능하면 가능한 후보 수와 이유를 설명합니다.
+        - 추천 이유, 예상 총비용, 준비 또는 식사 방법을 적습니다.
+        - 입력 조건 충족 여부와 스킬 사용 여부를 보고하며, 확인하지 못한 호출 로그는 미확인으로 표시합니다.
+        - 결과는 실행 답변으로 작성하며 저장소 파일을 수정하지 않습니다.
     validations:
-      required: false
+      required: true
